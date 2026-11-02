@@ -1,319 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#102a43">
-<title>SILKYSINGZ GEOAI | POPULATION BY AGE CATEGORY</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<style>
-:root{--navy:#102a43;--blue:#176b87;--teal:#0e7490;--gold:#e3a008;--bg:#eef3f6;--panel:#fff;--line:#dce5eb;--muted:#64748b;--ink:#172b4d}
-*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-header{height:76px;background:linear-gradient(110deg,#102a43,#14566b);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:18px}
-.brand{display:flex;align-items:center;gap:13px}.mark{width:42px;height:42px;border:1px solid #8bc4d2;border-radius:12px;display:grid;place-items:center;font-weight:900;color:#b8e2eb;font-size:17px}.brand h1{font-size:17px;letter-spacing:.7px;margin:0}.brand p{font-size:11px;color:#c8dce5;margin:4px 0 0}.header-right{text-align:right;font-size:11px;color:#d7e8ee}.header-right strong{display:block;font-size:12px;color:#fff;margin-bottom:4px}
-.statusbar{height:34px;background:#e1edf2;border-bottom:1px solid #cbd9e1;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:11px;color:#35566a}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#d99b18;margin-right:7px}.dot.ok{background:#15966a}.dot.err{background:#c2413b}
-main{height:calc(100vh - 140px);min-height:580px;display:grid;grid-template-columns:minmax(260px, .9fr) minmax(420px,1.55fr) minmax(280px,.95fr);gap:10px;padding:10px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:11px;min-width:0;overflow:auto;box-shadow:0 2px 8px #102a4308}.panel-head{padding:14px 15px 10px;border-bottom:1px solid #edf1f4}.panel-head h2{font-size:13px;margin:0;color:#153b53;text-transform:uppercase;letter-spacing:.65px}.panel-head p{font-size:10px;color:var(--muted);margin:5px 0 0}.section{padding:12px 14px;border-bottom:1px solid #edf1f4}.section h3{font-size:11px;text-transform:uppercase;letter-spacing:.55px;color:#446174;margin:0 0 10px}.field{margin:0 0 10px}.field label{display:block;font-size:10px;color:#536b7b;font-weight:700;margin-bottom:5px}.field select,.field input{width:100%;border:1px solid #d5e0e7;border-radius:6px;padding:8px 9px;font-size:11px;background:#fff;color:#20394b;outline:none}.field select:focus,.field input:focus{border-color:#2783a0;box-shadow:0 0 0 2px #2783a01a}
-.btnrow{display:flex;gap:7px;flex-wrap:wrap}.btn{border:0;border-radius:6px;padding:8px 10px;font-size:10px;font-weight:700;cursor:pointer;background:#176b87;color:white}.btn.secondary{background:#e8f0f4;color:#24475b}.btn.gold{background:#e3a008;color:#172b4d}.btn:disabled{opacity:.5;cursor:not-allowed}
-.note{font-size:10px;line-height:1.5;color:#64748b}.map-panel{display:flex;flex-direction:column;overflow:hidden;position:relative}.map-toolbar{padding:10px 12px;border-bottom:1px solid #e7edf1;display:flex;align-items:center;justify-content:space-between;gap:8px}.map-toolbar strong{font-size:12px;color:#24475b}.map-toolbar select{border:1px solid #d5e0e7;border-radius:6px;padding:6px;font-size:10px}#map{flex:1;min-height:320px;background:#e6edf0}.map-bottom{padding:9px 12px;border-top:1px solid #e7edf1;display:flex;justify-content:space-between;gap:12px;align-items:center}.legend{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:9px;color:#536b7b}.swatch{width:13px;height:9px;border:1px solid #ffffffaa;display:inline-block}.map-caption{font-size:9px;color:#738494}
-.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}.kpi{border:1px solid #e4ebef;border-radius:8px;padding:10px;background:#fbfdfe}.kpi .v{font-size:20px;font-weight:800;color:#14566b;line-height:1.1;word-break:break-word}.kpi .l{font-size:9px;color:#718394;margin-top:5px;text-transform:uppercase;letter-spacing:.35px}
-.chartbox{padding:11px 13px;border-bottom:1px solid #edf1f4}.chartbox h3{font-size:11px;margin:0 0 8px;color:#36566a}.chartbox canvas{width:100%!important;max-height:220px}.tablewrap{overflow:auto;max-height:260px}.table{width:100%;border-collapse:collapse;font-size:10px}.table th,.table td{text-align:left;padding:7px 6px;border-bottom:1px solid #edf1f4;white-space:nowrap}.table th{background:#f5f8fa;color:#506879;position:sticky;top:0}.empty{padding:15px;color:#748494;font-size:11px;text-align:center}.selection{padding:11px 13px;font-size:10px;line-height:1.55;color:#486174}.selection strong{color:#183e55}
-footer{height:30px;background:#102a43;color:#d8e8ee;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font-size:9px;gap:10px}
-.leaflet-popup-content{font-size:11px;line-height:1.5}.leaflet-popup-content b{color:#14566b}
-@media(max-width:1050px){main{grid-template-columns:260px minmax(350px,1fr);height:auto;min-height:calc(100vh - 140px)}#analyticsPanel{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}#analyticsPanel .panel-head{grid-column:1/-1}#analyticsPanel .kpis{grid-column:1/-1}}
-@media(max-width:700px){header{height:auto;min-height:72px;padding:12px}.header-right{display:none}.statusbar{font-size:9px}main{display:flex;flex-direction:column;height:auto;min-height:0}.panel{max-height:none}.map-panel{height:570px;order:1}#controlsPanel{order:0}#analyticsPanel{order:2;display:block}#map{min-height:420px}footer{height:auto;min-height:36px;padding:8px;flex-direction:column;text-align:center}}
-</style>
-</head>
-<body>
-<header>
- <div class="brand"><div class="mark">G</div><div><h1>SILKYSINGZ GEOAI · POPULATION INTELLIGENCE</h1><p>Census Enumeration Area Mapping & Age Structure Analysis · The Gambia</p></div></div>
- <div class="header-right"><strong>GIS-CARTOGRAPHY UNIT</strong>Population by Age Category · Interactive Web GIS</div>
-</header>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>GBoS GEOAI | Census Geography & Settlement Population</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>
+:root{--navy:#102a43;--blue:#176b87;--teal:#0e7490;--gold:#e3a008;--bg:#eef3f6;--line:#dce5eb;--muted:#64748b;--ink:#172b4d}*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}header{height:76px;background:linear-gradient(110deg,#102a43,#14566b);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:18px}.brand{display:flex;align-items:center;gap:13px}.mark{width:42px;height:42px;border:1px solid #8bc4d2;border-radius:12px;display:grid;place-items:center;font-weight:900;color:#b8e2eb;font-size:17px}.brand h1{font-size:17px;letter-spacing:.7px;margin:0}.brand p{font-size:11px;color:#c8dce5;margin:4px 0 0}.header-right{text-align:right;font-size:11px;color:#d7e8ee}.header-right strong{display:block;font-size:12px;color:#fff;margin-bottom:4px}.statusbar{height:34px;background:#e1edf2;border-bottom:1px solid #cbd9e1;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:11px;color:#35566a}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#d99b18;margin-right:7px}.dot.ok{background:#15966a}.dot.err{background:#c2413b}main{height:calc(100vh - 140px);min-height:580px;display:grid;grid-template-columns:minmax(260px,.9fr) minmax(420px,1.55fr) minmax(280px,.95fr);gap:10px;padding:10px}.panel{background:#fff;border:1px solid var(--line);border-radius:11px;min-width:0;overflow:auto;box-shadow:0 2px 8px #102a4308}.panel-head{padding:14px 15px 10px;border-bottom:1px solid #edf1f4}.panel-head h2{font-size:13px;margin:0;color:#153b53;text-transform:uppercase;letter-spacing:.65px}.panel-head p{font-size:10px;color:var(--muted);margin:5px 0 0}.section{padding:12px 14px;border-bottom:1px solid #edf1f4}.section h3{font-size:11px;text-transform:uppercase;letter-spacing:.55px;color:#446174;margin:0 0 10px}.field{margin:0 0 10px}.field label{display:block;font-size:10px;color:#536b7b;font-weight:700;margin-bottom:5px}.field select,.field input{width:100%;border:1px solid #d5e0e7;border-radius:6px;padding:8px 9px;font-size:11px;background:#fff;color:#20394b}.btnrow{display:flex;gap:7px;flex-wrap:wrap}.btn{border:0;border-radius:6px;padding:8px 10px;font-size:10px;font-weight:700;cursor:pointer;background:#176b87;color:white}.btn.secondary{background:#e8f0f4;color:#24475b}.note{font-size:10px;line-height:1.5;color:#64748b}.map-panel{display:flex;flex-direction:column;overflow:hidden;position:relative}.map-toolbar{padding:10px 12px;border-bottom:1px solid #e7edf1;display:flex;align-items:center;justify-content:space-between;gap:8px}.map-toolbar strong{font-size:12px;color:#24475b}.map-toolbar select{border:1px solid #d5e0e7;border-radius:6px;padding:6px;font-size:10px}#map{flex:1;min-height:320px;background:#e6edf0}.map-bottom{padding:9px 12px;border-top:1px solid #e7edf1;display:flex;justify-content:space-between;gap:12px;align-items:center}.legend{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:9px;color:#536b7b}.swatch{width:13px;height:9px;border:1px solid #ffffffaa;display:inline-block}.map-caption{font-size:9px;color:#738494}.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}.kpi{border:1px solid #e4ebef;border-radius:8px;padding:10px;background:#fbfdfe}.kpi .v{font-size:20px;font-weight:800;color:#14566b;line-height:1.1;word-break:break-word}.kpi .l{font-size:9px;color:#718394;margin-top:5px;text-transform:uppercase;letter-spacing:.35px}.chartbox{padding:11px 13px;border-bottom:1px solid #edf1f4}.chartbox h3{font-size:11px;margin:0 0 8px;color:#36566a}.chartbox canvas{width:100%!important;max-height:210px}.tablewrap{overflow:auto;max-height:245px}.table{width:100%;border-collapse:collapse;font-size:10px}.table th,.table td{text-align:left;padding:7px 6px;border-bottom:1px solid #edf1f4;white-space:nowrap}.table th{background:#f5f8fa;color:#506879;position:sticky;top:0}.selection{padding:11px 13px;font-size:10px;line-height:1.55;color:#486174;max-height:115px;overflow:auto}.selection strong{color:#183e55}footer{height:30px;background:#102a43;color:#d8e8ee;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font-size:9px;gap:10px}.leaflet-popup-content{font-size:11px;line-height:1.5}@media(max-width:1050px){main{grid-template-columns:260px minmax(350px,1fr);height:auto;min-height:calc(100vh - 140px)}#analyticsPanel{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}#analyticsPanel .panel-head,#analyticsPanel .kpis{grid-column:1/-1}}@media(max-width:700px){header{height:auto;min-height:72px;padding:12px}.header-right{display:none}.statusbar{font-size:9px}main{display:flex;flex-direction:column;height:auto;min-height:0}.panel{max-height:none}.map-panel{height:570px;order:1}#controlsPanel{order:0}#analyticsPanel{order:2;display:block}#map{min-height:420px}footer{height:auto;min-height:36px;padding:8px;flex-direction:column;text-align:center}}
+</style></head><body>
+<header><div class="brand"><div class="mark">G</div><div><h1>GBoS GEOAI · POPULATION INTELLIGENCE</h1><p>Independent Census EA Boundaries & Settlement Population Analysis · The Gambia</p></div></div><div class="header-right"><strong>GIS / CARTOGRAPHY UNIT</strong>Separate-source browser GIS</div></header>
 <div class="statusbar"><span><i id="statusDot" class="dot"></i><span id="statusText">Connecting to GitHub data sources…</span></span><span id="lastUpdated">Automatic repository data loading</span></div>
 <main>
- <aside class="panel" id="controlsPanel">
-  <div class="panel-head"><h2>01 · Controls & filters</h2><p>Filter census geography and population attributes.</p></div>
-  <div class="section">
-   <h3>Data connection</h3>
-   <div class="field"><label>Data status</label><input id="dataStatus" value="Waiting for data…" readonly></div>
-   <div class="btnrow"><button class="btn" id="reloadBtn">Reload GitHub data</button><button class="btn secondary" id="resetBtn">Reset filters</button></div>
-   <p class="note" style="margin:9px 0 0">The application attempts the repository root and /data/ folder automatically. No manual upload is required.</p>
-  </div>
-  <div class="section">
-   <h3>Administrative selection</h3>
-   <div class="field"><label>Local Government Area</label><select id="lga"><option value="">All LGAs</option></select></div>
-   <div class="field"><label>District</label><select id="district"><option value="">All districts</option></select></div>
-   <div class="field"><label>Ward</label><select id="ward"><option value="">All wards</option></select></div>
-   <div class="field"><label>Enumeration Area</label><select id="ea"><option value="">All enumeration areas</option></select></div>
-   <div class="field"><label>Age category / map variable</label><select id="mapMetric"><option value="total">Total population (from age data)</option></select></div>
-   <div class="btnrow"><button class="btn" id="applyBtn">Apply filters</button></div>
-  </div>
-  <div class="section">
-   <h3>Map settings</h3>
-   <div class="field"><label>Basemap</label><select id="basemap"><option value="street">Street map</option><option value="satellite">Satellite</option><option value="topo">Terrain</option><option value="dark">Dark</option></select></div>
-   <div class="field"><label>Polygon display</label><select id="mapStyle"><option value="choropleth">Population choropleth</option><option value="outline">EA boundaries only</option></select></div>
-   <div class="field"><label>Search EA / settlement / code</label><input id="searchEA" placeholder="Type EA name or code…"></div>
-   <div class="btnrow"><button class="btn secondary" id="searchBtn">Find on map</button><button class="btn secondary" id="zoomBtn">Zoom to Gambia</button></div>
-  </div>
-  <div class="section">
-   <h3>Exports</h3>
-   <div class="btnrow"><button class="btn secondary" id="csvBtn">Export filtered CSV</button><button class="btn secondary" id="geoBtn">Export filtered GeoJSON</button></div>
-   <p class="note">Exports reflect the current administrative selection and joined population attributes.</p>
-  </div>
-  <div class="section">
-   <h3>Join & data validation</h3>
-   <div id="joinInfo" class="note">Waiting for the Excel workbook and EA boundaries.</div>
-  </div>
- </aside>
-
- <section class="panel map-panel">
-  <div class="map-toolbar"><strong>02 · Interactive Census Enumeration Area Map</strong><span id="visibleCount" class="note">0 EAs displayed</span></div>
-  <div id="map"></div>
-  <div class="map-bottom"><div class="legend" id="legend"><b>Population legend</b><span class="note">Waiting for data</span></div><div class="map-caption">© OpenStreetMap · © Esri · Leaflet</div></div>
-  <div class="selection" id="selectedInfo"><strong>Selected EA:</strong> Click an enumeration area to inspect its attributes and age structure.</div>
- </section>
-
- <aside class="panel" id="analyticsPanel">
-  <div class="panel-head"><h2>03 · Analytics & results</h2><p>Statistics update with the selected administrative filters.</p></div>
-  <div class="kpis">
-   <div class="kpi"><div class="v" id="kpiEAs">—</div><div class="l">Visible EAs</div></div>
-   <div class="kpi"><div class="v" id="kpiPop">—</div><div class="l">Population total</div></div>
-   <div class="kpi"><div class="v" id="kpiLgas">—</div><div class="l">LGAs represented</div></div>
-   <div class="kpi"><div class="v" id="kpiMatched">—</div><div class="l">Matched EAs</div></div>
-  </div>
-  <div class="chartbox"><h3>Population by age category</h3><canvas id="ageChart"></canvas><div class="note" id="ageNote">Age category totals will appear after the workbook is loaded.</div></div>
-  <div class="chartbox"><h3>Population by sex</h3><canvas id="sexChart"></canvas><div class="note" id="sexNote">Displayed only when sex-disaggregated fields are present in the workbook.</div></div>
-  <div class="chartbox"><h3>Top 10 EAs by selected population</h3><div class="tablewrap"><table class="table"><thead><tr><th>Enumeration Area</th><th>District</th><th>Population</th></tr></thead><tbody id="topTable"><tr><td colspan="3">Waiting for data…</td></tr></tbody></table></div></div>
-  <div class="chartbox"><h3>Administrative summary</h3><div class="tablewrap"><table class="table"><thead><tr><th>Local Government Area</th><th>EAs</th><th>Population</th></tr></thead><tbody id="adminTable"><tr><td colspan="3">Waiting for data…</td></tr></tbody></table></div></div>
-  <div class="chartbox"><h3>Methodology & interpretation</h3><div class="note">Population records are joined to Census EA polygons using a shared EA identifier where available. The application tests common fields such as feacode, FEA_Code, EA_code and Join_ID. Age-group totals are calculated from the workbook records and are not estimated. Unmatched records are reported in the join diagnostics. Results depend on the source workbook's geographic coverage and definitions; do not interpret missing values as zero population.</div></div>
- </aside>
-</main>
-<footer><span><strong>Produced by Ansu Singhateh</strong> · GIS Analyst | GIS-Cartography Unit | Gambia Bureau of Statistics</span><span>GEOAI · Research and educational use · Data: supplied census datasets</span></footer>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script>
-"use strict";
-const OWNER="silkysingz94-oss", REPO="population_by_age_category", BRANCH="main";
-const ROOT=`https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/`;
-const GEO_CANDIDATES=["Census_EAs_Geo.json","data/Census_EAs_Geo.json","Census_EAs_Geo(1).json"];
-const XLS_CANDIDATES=["population_by_age_category.xlsx","data/population_by_age_category.xlsx"];
-const $=id=>document.getElementById(id);
-let allFeatures=[], joinedFeatures=[], visibleFeatures=[], ageKeys=[], sexKeys=[], ageChart=null,sexChart=null,geoLayer=null,selectedLayer=null;
-let mapMetric="total", workbookRows=[], joinKeyGeo="",joinKeyXls="", ageLabelMap={};
-const fmt=n=>Number.isFinite(Number(n))?Number(n).toLocaleString("en-US",{maximumFractionDigits:0}):"—";
-const norm=s=>String(s??"").toLowerCase().trim().replace(/[\s_\-./]+/g,"").replace(/[^a-z0-9]/g,"");
-const num=v=>{if(v===null||v===undefined||v==="")return null;const n=Number(String(v).replace(/[, ]/g,""));return Number.isFinite(n)?n:null};
-const unique=a=>[...new Set(a.filter(v=>v!==null&&v!==undefined&&String(v).trim()!=="").map(String))].sort((a,b)=>a.localeCompare(b));
-function setStatus(msg,type=""){ $("statusText").textContent=msg;$("dataStatus").value=msg;$("statusDot").className="dot "+(type==="ok"?"ok":type==="err"?"err":"");}
-async function fetchFirst(paths,kind){
- let errors=[];
- for(const p of paths){try{const url=ROOT+p+(p.includes("?")?"&":"?")+"v="+Date.now();const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error(`${r.status} ${r.statusText}`);return {buffer:kind==="xlsx"?await r.arrayBuffer():await r.json(),url};}catch(e){errors.push(p+": "+e.message);}}
- throw new Error(errors.join(" | "));
-}
-const map=L.map("map",{zoomControl:true,preferCanvas:true}).setView([13.45,-15.55],8);
-const baseLayers={
- street:L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"}),
- satellite:L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles © Esri"}),
- topo:L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:"© OpenTopoMap"}),
- dark:L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19,attribution:"© CARTO"})
-};
-let activeBase=baseLayers.street.addTo(map);
-$("basemap").addEventListener("change",e=>{map.removeLayer(activeBase);activeBase=baseLayers[e.target.value].addTo(map);});
-const palette=["#ffffcc","#ffeda0","#fed976","#feb24c","#fd8d3c","#f03b20","#bd0026"];
-function fieldMatch(obj,candidates){const keys=Object.keys(obj||{});for(const c of candidates){const k=keys.find(x=>norm(x)===norm(c));if(k)return k;}return null;}
-function detectGeoKey(props){return fieldMatch(props,["feacode","FEA_Code","EA_code","eaname","Join_ID","FID","OBJECTID_1"]);}
-function detectExcelKey(row){return fieldMatch(row,["feacode","FEA_Code","EA_code","ea_code","enumeration_area_code","EA code","ea","join_id","Join_ID","code"]);}
-function detectPopulationColumns(headers){
- const ageWords=/age|under|below|years|year|0.?4|5.?9|10.?14|15.?19|20.?24|25.?29|30.?34|35.?39|40.?44|45.?49|50.?54|55.?59|60.?64|65|elder|youth|child|working/i;
- const skip=/code|name|lga|district|ward|sex|gender|total|population|pop|ea|fid|id|serial|remark|sheet/i;
- return headers.filter(h=>ageWords.test(String(h))&&!skip.test(String(h)) || /^(male|female)[ _-]?(0|under|[1-9]|[0-9]{2})/i.test(String(h)));
-}
-function detectLongColumns(row){
- return {age:fieldMatch(row,["age_category","age group","age_group","age category","category","age_range","age range"]),
- pop:fieldMatch(row,["population","pop","count","total_population","value"]),
- sex:fieldMatch(row,["sex","gender"])};
-}
-function normalizeAgeName(s){return String(s).trim().replace(/[_]+/g," ").replace(/\s+/g," ");}
-function extractWorkbook(wb){
- const sheetName=wb.SheetNames[0];const ws=wb.Sheets[sheetName];const rows=XLSX.utils.sheet_to_json(ws,{defval:null,raw:true});
- if(!rows.length)throw new Error("The first worksheet contains no records.");
- return rows;
-}
-function createPopulationIndex(rows){
- const first=rows[0], headers=Object.keys(first), idKey=detectExcelKey(first);
- const long=detectLongColumns(first);
- const index=new Map(), ageSet=new Set(), sexSet=new Set();
- if(!idKey)throw new Error("Could not identify the EA join field in the Excel file. Expected a field such as feacode, EA_code or Join_ID.");
- const ageCols=detectPopulationColumns(headers);
- const totalKey=fieldMatch(first,["total_population","population_total","total pop","population"]);
- const sexKey=long.sex;
- if(long.age&&long.pop){
-   rows.forEach(row=>{
-    const id=String(row[idKey]??"").trim();if(!id)return;
-    const age=normalizeAgeName(row[long.age]??"Unspecified");const value=num(row[long.pop]);if(value===null)return;
-    ageSet.add(age);const sex=sexKey?String(row[sexKey]??"").trim():"";
-    if(!index.has(id))index.set(id,{ages:{},sexes:{},total:0});
-    const rec=index.get(id);rec.ages[age]=(rec.ages[age]||0)+value;rec.total+=value;
-    if(sex){sexSet.add(sex);rec.sexes[sex]=(rec.sexes[sex]||0)+value;}
-   });
- } else if(ageCols.length){
-   rows.forEach(row=>{
-    const id=String(row[idKey]??"").trim();if(!id)return;
-    if(!index.has(id))index.set(id,{ages:{},sexes:{},total:0});
-    const rec=index.get(id);
-    ageCols.forEach(k=>{const v=num(row[k]);if(v!==null){const label=normalizeAgeName(k);rec.ages[label]=(rec.ages[label]||0)+v;rec.total+=v;ageSet.add(label);}});
-    if(totalKey){const t=num(row[totalKey]);if(t!==null)rec.sourceTotal=t;}
-   });
- } else if(totalKey){
-   rows.forEach(row=>{const id=String(row[idKey]??"").trim();const v=num(row[totalKey]);if(!id||v===null)return;index.set(id,{ages:{},sexes:{},total:v,sourceTotal:v});});
- } else {
-   throw new Error("The Excel workbook was read, but no age-category or population-value columns were detected. Check the worksheet headers.");
- }
- return {index,idKey,ageKeys:[...ageSet].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),sexKeys:[...sexSet],headers};
-}
-function attachPopulation(geo,pop){
- let matched=0,missing=0;
- const features=geo.features.map(f=>{
-  const p={...(f.properties||{})};const gKey=detectGeoKey(p);const id=gKey?String(p[gKey]??"").trim():"";
-  let rec=id?pop.index.get(id):null;
-  if(!rec && id){const normalized=norm(id);for(const [k,v] of pop.index){if(norm(k)===normalized){rec=v;break;}}}
-  if(rec){matched++;p._age=rec.ages;p._sex=rec.sexes;p._popTotal=rec.sourceTotal??rec.total;p._matched=true;}
-  else{missing++;p._age={};p._sex={};p._popTotal=null;p._matched=false;}
-  p._joinId=id;p._joinField=gKey||"Not found";
-  return {...f,properties:p};
- });
- return {type:"FeatureCollection",features};
-}
-function getProp(p,candidates){const k=fieldMatch(p,candidates);return k?p[k]:"";}
-function lgaOf(f){return String(getProp(f.properties,["lganame","lga","local_government_area"])||"Unknown");}
-function districtOf(f){return String(getProp(f.properties,["distname","district","hdistrict"])||"Unknown");}
-function wardOf(f){return String(getProp(f.properties,["wardname","ward","hward"])||"Unknown");}
-function eaOf(f){return String(getProp(f.properties,["eaname","ea_name","settlement_name"])||f.properties._joinId||"Unnamed EA");}
-function codeOf(f){return String(getProp(f.properties,["feacode","FEA_Code","EA_code","_joinId"])||f.properties._joinId||"");}
-function featureValue(f,key){const p=f.properties;if(key==="total")return p._popTotal;return num(p._age?.[key]);}
-function currentFilters(){
- const l=$("lga").value,d=$("district").value,w=$("ward").value,e=$("ea").value;
- return allFeatures.filter(f=>(!l||lgaOf(f)===l)&&(!d||districtOf(f)===d)&&(!w||wardOf(f)===w)&&(!e||eaOf(f)===e));
-}
-function fillSelect(id,values,placeholder){const el=$(id),old=el.value;el.innerHTML="";const o=document.createElement("option");o.value="";o.textContent=placeholder;el.appendChild(o);unique(values).forEach(v=>{const x=document.createElement("option");x.value=v;x.textContent=v;el.appendChild(x);});if([...el.options].some(x=>x.value===old))el.value=old;}
-function refreshAdminSelectors(){
- const l=$("lga").value,d=$("district").value,w=$("ward").value;
- const base=allFeatures.filter(f=>!l||lgaOf(f)===l);
- fillSelect("district",base.map(districtOf),"All districts");$("district").value=d&&[...$("district").options].some(o=>o.value===d)?d:"";
- const base2=base.filter(f=>!$("district").value||districtOf(f)===$("district").value);
- fillSelect("ward",base2.map(wardOf),"All wards");$("ward").value=w&&[...$("ward").options].some(o=>o.value===w)?w:"";
- const base3=base2.filter(f=>!$("ward").value||wardOf(f)===$("ward").value);
- fillSelect("ea",base3.map(eaOf),"All enumeration areas");
-}
-function metricOptions(){
- const el=$("mapMetric");el.innerHTML='<option value="total">Total population (from age data)</option>';
- ageKeys.forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=k;el.appendChild(o);});
-}
-function getBreaks(values){
- const a=values.filter(v=>Number.isFinite(v)).sort((x,y)=>x-y);if(!a.length)return [];
- return [0,1,2,3,4,5].map(i=>a[Math.min(a.length-1,Math.floor((a.length-1)*i/6))]);
-}
-function colorFor(v,breaks){if(v===null||v===undefined||!Number.isFinite(Number(v)))return "#cbd5e1";let i=0;for(let j=1;j<breaks.length;j++)if(Number(v)>breaks[j])i=j;return palette[Math.min(i,palette.length-1)];}
-function styleFeature(f,breaks){const v=featureValue(f,mapMetric);if($("mapStyle").value==="outline")return {color:"#31566b",weight:.7,fillColor:"#8ba9b7",fillOpacity:.10};return {color:"#fff",weight:.55,fillColor:colorFor(v,breaks),fillOpacity:.78};}
-function popupHtml(f){
- const p=f.properties, ages=p._age||{};const items=Object.entries(ages).sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).map(([k,v])=>`<tr><td>${esc(k)}</td><td style="text-align:right">${fmt(v)}</td></tr>`).join("");
- const sexes=Object.entries(p._sex||{}).map(([k,v])=>`<tr><td>${esc(k)}</td><td style="text-align:right">${fmt(v)}</td></tr>`).join("");
- return `<div style="min-width:190px"><b>${esc(eaOf(f))}</b><br><span>${esc(lgaOf(f))} · ${esc(districtOf(f))} · ${esc(wardOf(f))}</span><hr><b>EA code:</b> ${esc(codeOf(f))}<br><b>Population:</b> ${p._popTotal===null?"Not matched":fmt(p._popTotal)}<br><b>Join status:</b> ${p._matched?"Matched":"No matching Excel record"}${items?`<hr><b>Age category</b><table>${items}</table>`:""}${sexes?`<hr><b>Sex</b><table>${sexes}</table>`:""}</div>`;
-}
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function drawMap(features){
- if(geoLayer)map.removeLayer(geoLayer);
- const values=features.map(f=>featureValue(f,mapMetric)).filter(v=>v!==null&&Number.isFinite(Number(v)));
- const breaks=getBreaks(values);
- geoLayer=L.geoJSON({type:"FeatureCollection",features},{
-  style:f=>styleFeature(f,breaks),
-  onEachFeature:(f,layer)=>{
-   layer.bindPopup(popupHtml(f),{maxWidth:310});
-   layer.on("click",()=>{if(selectedLayer&&geoLayer)geoLayer.resetStyle(selectedLayer);selectedLayer=layer;layer.setStyle({color:"#111827",weight:2.5,fillOpacity:.9});showSelected(f);});
-   layer.on("mouseover",()=>{if(layer!==selectedLayer)layer.setStyle({weight:1.8,color:"#263f50"});});
-   layer.on("mouseout",()=>{if(layer!==selectedLayer)geoLayer.resetStyle(layer);});
-  }
- }).addTo(map);
- $("visibleCount").textContent=features.length.toLocaleString()+" EAs displayed";
- if(features.length){const b=geoLayer.getBounds();if(b.isValid())map.fitBounds(b,{padding:[15,15],maxZoom:12});}
- renderLegend(breaks,values);
-}
-function renderLegend(breaks,values){
- const el=$("legend");if(!values.length){el.innerHTML="<b>Population legend</b><span class='note'>No matched population values in selection</span>";return;}
- const labels=palette.map((c,i)=>`<span class="swatch" style="background:${c}"></span><span>${i===0?"≤ "+fmt(breaks[1]??breaks[0]):i===6?"> "+fmt(breaks[5]):fmt(breaks[i])+"–"+fmt(breaks[i+1])}</span>`);
- el.innerHTML="<b>"+esc(mapMetric==="total"?"Total population":mapMetric)+"</b> "+labels.join("");
-}
-function showSelected(f){
- const p=f.properties;const ages=Object.entries(p._age||{}).map(([k,v])=>`${esc(k)}: <b>${fmt(v)}</b>`).join(" · ")||"Age detail unavailable";
- $("selectedInfo").innerHTML=`<strong>Selected EA:</strong> ${esc(eaOf(f))} · <strong>Code:</strong> ${esc(codeOf(f))} · <strong>Population:</strong> ${p._popTotal===null?"Not matched":fmt(p._popTotal)}<br><strong>Geography:</strong> ${esc(lgaOf(f))} / ${esc(districtOf(f))} / ${esc(wardOf(f))}<br><strong>Age structure:</strong> ${ages}`;
-}
-function aggregate(features){
- const age={},sex={},admin={},top=[];let total=0,matched=0;
- features.forEach(f=>{const p=f.properties;if(p._matched)matched++;if(p._popTotal!==null){total+=Number(p._popTotal)||0;}
- Object.entries(p._age||{}).forEach(([k,v])=>age[k]=(age[k]||0)+(Number(v)||0));
- Object.entries(p._sex||{}).forEach(([k,v])=>sex[k]=(sex[k]||0)+(Number(v)||0));
- const l=lgaOf(f);if(!admin[l])admin[l]={n:0,pop:0};admin[l].n++;if(p._popTotal!==null)admin[l].pop+=Number(p._popTotal)||0;
- if(p._popTotal!==null)top.push({name:eaOf(f),district:districtOf(f),pop:Number(p._popTotal)});
- });
- return {total,matched,age,sex,admin,top:top.sort((a,b)=>b.pop-a.pop).slice(0,10)};
-}
-function renderCharts(stats){
- const labels=Object.keys(stats.age).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),vals=labels.map(k=>stats.age[k]);
- if(ageChart)ageChart.destroy();
- ageChart=new Chart($("ageChart"),{type:"bar",data:{labels,datasets:[{label:"Population",data:vals,backgroundColor:"#2383a1",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},maxRotation:50,minRotation:0}},y:{beginAtZero:true,ticks:{font:{size:9}}}}}});
- $("ageNote").textContent=labels.length?`Aggregated across ${stats.matched.toLocaleString()} matched EAs in the current selection.`:"No age-category columns were identified or matched.";
- const sl=Object.keys(stats.sex),sv=sl.map(k=>stats.sex[k]);
- if(sexChart)sexChart.destroy();
- sexChart=new Chart($("sexChart"),{type:"doughnut",data:{labels:sl.length?sl:["No sex field"],datasets:[{data:sl.length?sv:[1],backgroundColor:["#247ba0","#e07a5f","#81b29a","#f2cc8f"]}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:"bottom",labels:{font:{size:9}}}}}});
- $("sexNote").textContent=sl.length?"Sex totals are taken from the sex-disaggregated fields in the workbook.":"No sex-disaggregated records/columns detected; no sex estimates are inferred.";
-}
-function renderAnalytics(features){
- const s=aggregate(features);$("kpiEAs").textContent=fmt(features.length);$("kpiPop").textContent=fmt(s.total);$("kpiLgas").textContent=fmt(new Set(features.map(lgaOf)).size);$("kpiMatched").textContent=fmt(s.matched);
- renderCharts(s);
- $("topTable").innerHTML=s.top.length?s.top.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.district)}</td><td>${fmt(x.pop)}</td></tr>`).join(""):'<tr><td colspan="3">No matched population records.</td></tr>';
- $("adminTable").innerHTML=Object.entries(s.admin).sort((a,b)=>b[1].pop-a[1].pop).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${fmt(v.n)}</td><td>${fmt(v.pop)}</td></tr>`).join("")||'<tr><td colspan="3">No data.</td></tr>';
-}
-function applyFilters(){
- visibleFeatures=currentFilters();mapMetric=$("mapMetric").value||"total";drawMap(visibleFeatures);renderAnalytics(visibleFeatures);
-}
-function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
-function csvEscape(v){const s=String(v??"");return '"'+s.replace(/"/g,'""')+'"';}
-function exportCSV(){if(!visibleFeatures.length)return alert("There are no visible EAs to export.");const cols=["EA name","EA code","LGA","District","Ward","Population",...ageKeys];const rows=[cols,...visibleFeatures.map(f=>[eaOf(f),codeOf(f),lgaOf(f),districtOf(f),wardOf(f),f.properties._popTotal,...ageKeys.map(k=>f.properties._age?.[k]??"")])];download("GBoS_GEOAI_population_by_age_filtered.csv","\ufeff"+rows.map(r=>r.map(csvEscape).join(",")).join("\n"),"text/csv;charset=utf-8");}
-function exportGeo(){if(!visibleFeatures.length)return alert("There are no visible EAs to export.");download("GBoS_GEOAI_population_EAs.geojson",JSON.stringify({type:"FeatureCollection",features:visibleFeatures},null,2),"application/geo+json");}
-async function loadData(){
- setStatus("Fetching GeoJSON and Excel files from GitHub…");
- $("joinInfo").textContent="Connecting to the repository…";
- try{
-  const [g,x]=await Promise.all([fetchFirst(GEO_CANDIDATES,"json"),fetchFirst(XLS_CANDIDATES,"xlsx")]);
-  if(!g.buffer||!Array.isArray(g.buffer.features))throw new Error("GeoJSON is not a valid FeatureCollection.");
-  const wb=XLSX.read(g===null?null:x.buffer,{type:"array"});workbookRows=extractWorkbook(wb);
-  const pop=createPopulationIndex(workbookRows);ageKeys=pop.ageKeys;sexKeys=pop.sexKeys;
-  const joined=attachPopulation(g.buffer,pop);allFeatures=joined.features;joinKeyGeo=detectGeoKey(allFeatures[0]?.properties||{})||"Not detected";joinKeyXls=pop.idKey;
-  const matched=allFeatures.filter(f=>f.properties._matched).length;
-  joinedFeatures=allFeatures;
-  fillSelect("lga",allFeatures.map(lgaOf),"All LGAs");refreshAdminSelectors();metricOptions();
-  $("joinInfo").innerHTML=`<b>GeoJSON:</b> ${esc(g.url.split("/").slice(-1)[0])}<br><b>Excel:</b> ${esc(x.url.split("/").slice(-1)[0])}<br><b>EA join field:</b> ${esc(joinKeyGeo)} ↔ ${esc(joinKeyXls)}<br><b>GeoJSON features:</b> ${fmt(allFeatures.length)}<br><b>Excel records:</b> ${fmt(workbookRows.length)}<br><b>Matched EAs:</b> ${fmt(matched)}<br><b>Unmatched EAs:</b> ${fmt(allFeatures.length-matched)}<br><b>Age fields detected:</b> ${ageKeys.length?ageKeys.map(esc).join(", "):"None"}`;
-  $("lastUpdated").textContent="Loaded "+new Date().toLocaleString();
-  setStatus(`Loaded ${fmt(allFeatures.length)} EA polygons · ${fmt(matched)} matched to population records`,matched?"ok":"err");
-  applyFilters();
- }catch(e){
-  console.error(e);setStatus("Data loading failed: "+e.message,"err");
-  $("joinInfo").textContent="Could not load both datasets. "+e.message+" Check that the files are committed to the repository root or /data/ folder, and that the branch is main.";
-  $("topTable").innerHTML='<tr><td colspan="3">Data unavailable.</td></tr>';
- }
-}
-$("lga").addEventListener("change",()=>{refreshAdminSelectors();});
-$("district").addEventListener("change",()=>{const l=$("lga").value;const d=$("district").value;const sub=allFeatures.filter(f=>(!l||lgaOf(f)===l)&&(!d||districtOf(f)===d));fillSelect("ward",sub.map(wardOf),"All wards");fillSelect("ea",sub.map(eaOf),"All enumeration areas");});
-$("ward").addEventListener("change",()=>{const l=$("lga").value,d=$("district").value,w=$("ward").value;const sub=allFeatures.filter(f=>(!l||lgaOf(f)===l)&&(!d||districtOf(f)===d)&&(!w||wardOf(f)===w));fillSelect("ea",sub.map(eaOf),"All enumeration areas");});
-$("applyBtn").onclick=applyFilters;$("mapMetric").onchange=applyFilters;$("mapStyle").onchange=applyFilters;
-$("reloadBtn").onclick=loadData;
-$("resetBtn").onclick=()=>{$("lga").value="";refreshAdminSelectors();$("district").value="";$("ward").value="";$("ea").value="";$("mapMetric").value="total";$("searchEA").value="";applyFilters();};
-$("zoomBtn").onclick=()=>map.setView([13.45,-15.55],8);
-$("searchBtn").onclick=()=>{const q=norm($("searchEA").value);if(!q)return;const f=allFeatures.find(f=>norm(eaOf(f)).includes(q)||norm(codeOf(f)).includes(q)||norm(districtOf(f)).includes(q)||norm(lgaOf(f)).includes(q));if(!f){alert("No matching EA or administrative name was found.");return;}const layer=geoLayer?.getLayers().find(l=>l.feature===f);if(layer){map.fitBounds(layer.getBounds(),{maxZoom:15});layer.openPopup();showSelected(f);}};
-$("csvBtn").onclick=exportCSV;$("geoBtn").onclick=exportGeo;
+<aside class="panel" id="controlsPanel"><div class="panel-head"><h2>01 · Controls & filters</h2><p>Two datasets are loaded and analysed independently.</p></div>
+<div class="section"><h3>Data connection</h3><div class="field"><label>Dataset loading status</label><input id="dataStatus" readonly value="Waiting for data…"></div><div class="btnrow"><button class="btn" id="reloadBtn">Reload GitHub data</button><button class="btn secondary" id="resetBtn">Reset filters</button></div><p class="note" style="margin:9px 0 0">Files are fetched independently from the repository root or its /data/ folder. No common field or join is required.</p></div>
+<div class="section"><h3>Settlement population filters · Excel</h3><div class="field"><label>Local Government Area</label><select id="lga"><option value="">All LGAs</option></select></div><div class="field"><label>District</label><select id="district"><option value="">All districts</option></select></div><div class="field"><label>Ward</label><select id="ward"><option value="">All wards</option></select></div><div class="field"><label>Settlement</label><select id="settlement"><option value="">All settlements</option></select></div><div class="field"><label>Settlement code</label><select id="settlementCode"><option value="">All settlement codes</option></select></div><div class="btnrow"><button class="btn" id="applyBtn">Apply settlement filters</button></div></div>
+<div class="section"><h3>EA boundary map · GeoJSON</h3><div class="field"><label>EA LGA</label><select id="geoLga"><option value="">All EA LGAs</option></select></div><div class="field"><label>EA district</label><select id="geoDistrict"><option value="">All EA districts</option></select></div><div class="field"><label>EA ward</label><select id="geoWard"><option value="">All EA wards</option></select></div><div class="field"><label>Polygon display</label><select id="mapStyle"><option value="outline">EA boundaries · outline</option><option value="filled">EA boundaries · filled</option></select></div><div class="field"><label>Search EA / code / ward</label><input id="searchEA" placeholder="Search GeoJSON attributes…"></div><div class="btnrow"><button class="btn secondary" id="searchBtn">Find EA</button><button class="btn secondary" id="zoomBtn">Zoom to Gambia</button></div></div>
+<div class="section"><h3>Map & exports</h3><div class="field"><label>Basemap</label><select id="basemap"><option value="street">Street map</option><option value="satellite">Satellite</option><option value="topo">Terrain</option><option value="dark">Dark</option></select></div><div class="btnrow"><button class="btn secondary" id="csvBtn">Export settlement CSV</button><button class="btn secondary" id="geoBtn">Export filtered EA GeoJSON</button></div></div>
+<div class="section"><h3>Data architecture & validation</h3><div id="joinInfo" class="note">The Excel table and EA GeoJSON will be loaded independently. Settlement records are not assigned to EA polygons.</div></div>
+</aside>
+<section class="panel map-panel"><div class="map-toolbar"><strong>02 · Census Enumeration Area Boundary Map</strong><span id="visibleCount" class="note">Waiting for GeoJSON…</span></div><div id="map"></div><div class="map-bottom"><div class="legend" id="legend"><b>EA boundary legend</b><span class="swatch" style="background:#b8d7e2"></span>Enumeration Area</div><div class="map-caption">© OpenStreetMap · © Esri · Leaflet</div></div><div class="selection" id="selectedInfo"><strong>Selected EA:</strong> Click an EA polygon to inspect its GeoJSON attributes. Settlement population is analysed separately.</div></section>
+<aside class="panel" id="analyticsPanel"><div class="panel-head"><h2>03 · Settlement analytics</h2><p>Population statistics from the Excel workbook only; no EA join.</p></div><div class="kpis"><div class="kpi"><div class="v" id="kpiRows">—</div><div class="l">Settlement records</div></div><div class="kpi"><div class="v" id="kpiPop">—</div><div class="l">Population total</div></div><div class="kpi"><div class="v" id="kpiSettlements">—</div><div class="l">Unique settlements</div></div><div class="kpi"><div class="v" id="kpiCodes">—</div><div class="l">Settlement codes</div></div></div>
+<div class="chartbox"><h3>Population by district</h3><canvas id="districtChart"></canvas><div class="note" id="districtNote">Calculated from filtered Excel records.</div></div><div class="chartbox"><h3>Population by ward · top 12</h3><canvas id="wardChart"></canvas></div><div class="chartbox"><h3>Largest settlement population records</h3><div class="tablewrap"><table class="table"><thead><tr><th>LGA</th><th>District</th><th>Ward</th><th>Settlement</th><th>Code</th><th>Population</th></tr></thead><tbody id="topTable"><tr><td colspan="6">Waiting for workbook…</td></tr></tbody></table></div></div><div class="chartbox"><h3>Settlement record preview</h3><div class="tablewrap"><table class="table"><thead><tr><th>Ward</th><th>Settlement</th><th>Code</th><th>Population</th></tr></thead><tbody id="recordTable"><tr><td colspan="4">Waiting for workbook…</td></tr></tbody></table></div></div><div class="chartbox"><h3>Interpretation & methodology</h3><div class="note">The Excel workbook is treated as an independent settlement-level population table. Population values are summed across the selected records. The GeoJSON is treated as an independent Enumeration Area boundary dataset and is displayed without settlement population values. Because the supplied datasets do not share a common geographic identifier, the application deliberately performs no spatial or attribute join. Settlement-code repetitions across wards are retained as separate source records.</div></div></aside>
+</main><footer><span><strong>Produced by Ansu Singhateh</strong> · GIS Analyst | GIS / Cartography Unit | GBoS</span><span>GBoS GEOAI · Research and educational use · Data: supplied census datasets</span></footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script><script>
+'use strict';
+const OWNER='silkysingz94-oss',REPO='population_by_age_category',BRANCH='main',ROOT=`https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/`;
+const GEO_PATHS=['Census_EAs_Geo.json','data/Census_EAs_Geo.json','Census_EAs_Geo(1).json'];const XLS_PATHS=['population_by_age_category.xlsx','data/population_by_age_category.xlsx'];const $=id=>document.getElementById(id);let geoFeatures=[],settlementRows=[],visibleRows=[],visibleGeo=[],eaLayer=null,selectedLayer=null,districtChart=null,wardChart=null;
+const fmt=v=>Number(v||0).toLocaleString('en-US',{maximumFractionDigits:0}),norm=v=>String(v??'').toLowerCase().trim().replace(/[^a-z0-9]/g,''),num=v=>{if(v===null||v===undefined||v==='')return null;let n=Number(String(v).replace(/[, ]/g,''));return Number.isFinite(n)?n:null;},unique=a=>[...new Set(a.filter(v=>v!==null&&v!==undefined&&String(v).trim()!=='').map(String))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+function status(msg,type=''){ $('statusText').textContent=msg;$('dataStatus').value=msg;$('statusDot').className='dot '+(type==='ok'?'ok':type==='err'?'err':''); }
+async function fetchFirst(paths,kind){let errs=[];for(const p of paths){try{let url=ROOT+p+'?v='+Date.now(),r=await fetch(url,{cache:'no-store'});if(!r.ok)throw Error(`${r.status} ${r.statusText}`);return {data:kind==='xlsx'?await r.arrayBuffer():await r.json(),url};}catch(e){errs.push(p+': '+e.message);}}throw Error(errs.join(' | '));}
+function keyOf(row,names){let ks=Object.keys(row||{});for(let n of names){let k=ks.find(x=>norm(x)===norm(n));if(k)return k;}return null;}
+const fields={lga:['lga'],district:['hdistrict','district'],ward:['hward','ward'],settlement:['SETTLEMENT_Name','settlement_name','settlement'],code:['hsettlement','settlement_code'],population:['population','pop']};
+function getRow(r,k){let key=keyOf(r,fields[k]);return key?r[key]:'';}function rowVal(r,k){return String(getRow(r,k)??'').trim();}function popVal(r){return num(getRow(r,'population'))||0;}
+function fill(id,values,label){let el=$(id),old=el.value;el.innerHTML='';let o=document.createElement('option');o.value='';o.textContent=label;el.append(o);unique(values).forEach(v=>{let x=document.createElement('option');x.value=v;x.textContent=v;el.append(x);});if([...el.options].some(x=>x.value===old))el.value=old;}
+const map=L.map('map',{preferCanvas:true}).setView([13.45,-15.55],8);const bases={street:L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}),satellite:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri'}),topo:L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'© OpenTopoMap'}),dark:L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'© CARTO'})};let activeBase=bases.street.addTo(map);$('basemap').onchange=e=>{map.removeLayer(activeBase);activeBase=bases[e.target.value].addTo(map);};
+function geoProp(f,candidates){let p=f.properties||{},k=keyOf(p,candidates);return k?String(p[k]??''):'Unknown';}function gLga(f){return geoProp(f,['lganame','lga','RCO']);}function gDistrict(f){return geoProp(f,['distname','district','hdistrict']);}function gWard(f){return geoProp(f,['wardname','ward','hward']);}function gEa(f){return geoProp(f,['eaname','ea_name','feacode','feacode_1']);}function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function currentGeo(){let l=$('geoLga').value,d=$('geoDistrict').value,w=$('geoWard').value;return geoFeatures.filter(f=>(!l||gLga(f)===l)&&(!d||gDistrict(f)===d)&&(!w||gWard(f)===w));}
+function drawGeo(){visibleGeo=currentGeo();if(eaLayer)map.removeLayer(eaLayer);let filled=$('mapStyle').value==='filled';eaLayer=L.geoJSON({type:'FeatureCollection',features:visibleGeo},{style:()=>({color:'#176b87',weight:.8,fillColor:'#65a9bd',fillOpacity:filled?.38:.07}),onEachFeature:(f,l)=>{l.bindPopup(`<b>${esc(gEa(f))}</b><br>LGA: ${esc(gLga(f))}<br>District: ${esc(gDistrict(f))}<br>Ward: ${esc(gWard(f))}<br><span style="color:#64748b">EA boundary only · no settlement population joined</span>`);l.on('click',()=>{$('selectedInfo').innerHTML=`<strong>Selected EA:</strong> ${esc(gEa(f))}<br><strong>Administrative area:</strong> ${esc(gLga(f))} / ${esc(gDistrict(f))} / ${esc(gWard(f))}<br><strong>Population:</strong> Not attached — Excel settlement table is an independent dataset.`;});}}).addTo(map);$('visibleCount').textContent=fmt(visibleGeo.length)+' EA polygons displayed';if(visibleGeo.length){let b=eaLayer.getBounds();if(b.isValid())map.fitBounds(b,{padding:[12,12],maxZoom:12});}}
+function filterRows(){let l=$('lga').value,d=$('district').value,w=$('ward').value,s=$('settlement').value,c=$('settlementCode').value;return settlementRows.filter(r=>(!l||rowVal(r,'lga')===l)&&(!d||rowVal(r,'district')===d)&&(!w||rowVal(r,'ward')===w)&&(!s||rowVal(r,'settlement')===s)&&(!c||rowVal(r,'code')===c));}
+function refreshSettlementSelectors(){let l=$('lga').value,d=$('district').value,w=$('ward').value;let a=settlementRows.filter(r=>!l||rowVal(r,'lga')===l);fill('district',a.map(r=>rowVal(r,'district')),'All districts');let b=a.filter(r=>!$('district').value||rowVal(r,'district')===$('district').value);fill('ward',b.map(r=>rowVal(r,'ward')),'All wards');let c=b.filter(r=>!$('ward').value||rowVal(r,'ward')===$('ward').value);fill('settlement',c.map(r=>rowVal(r,'settlement')),'All settlements');let d2=c.filter(r=>!$('settlement').value||rowVal(r,'settlement')===$('settlement').value);fill('settlementCode',d2.map(r=>rowVal(r,'code')),'All settlement codes');}
+function refreshGeoSelectors(){let l=$('geoLga').value,d=$('geoDistrict').value;let a=geoFeatures.filter(f=>!l||gLga(f)===l);fill('geoDistrict',a.map(gDistrict),'All EA districts');let b=a.filter(f=>!$('geoDistrict').value||gDistrict(f)===$('geoDistrict').value);fill('geoWard',b.map(gWard),'All EA wards');}
+function aggregate(rows,key){let o={};rows.forEach(r=>{let k=rowVal(r,key)||'Unknown';o[k]=(o[k]||0)+popVal(r);});return Object.entries(o).sort((a,b)=>b[1]-a[1]);}
+function renderAnalytics(){visibleRows=filterRows();let total=visibleRows.reduce((s,r)=>s+popVal(r),0);$('kpiRows').textContent=fmt(visibleRows.length);$('kpiPop').textContent=fmt(total);$('kpiSettlements').textContent=fmt(new Set(visibleRows.map(r=>rowVal(r,'settlement')).filter(Boolean)).size);$('kpiCodes').textContent=fmt(new Set(visibleRows.map(r=>rowVal(r,'code')).filter(Boolean)).size);let ds=aggregate(visibleRows,'district').slice(0,12),ws=aggregate(visibleRows,'ward').slice(0,12);if(districtChart)districtChart.destroy();districtChart=new Chart($('districtChart'),{type:'bar',data:{labels:ds.map(x=>x[0]),datasets:[{label:'Population',data:ds.map(x=>x[1]),backgroundColor:'#2383a1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}}}});if(wardChart)wardChart.destroy();wardChart=new Chart($('wardChart'),{type:'bar',data:{labels:ws.map(x=>x[0]),datasets:[{label:'Population',data:ws.map(x=>x[1]),backgroundColor:'#e3a008'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}}}});$('districtNote').textContent=`Summed from ${fmt(visibleRows.length)} source records; records are not deduplicated.`;let top=[...visibleRows].sort((a,b)=>popVal(b)-popVal(a)).slice(0,20);$('topTable').innerHTML=top.map(r=>`<tr><td>${esc(rowVal(r,'lga'))}</td><td>${esc(rowVal(r,'district'))}</td><td>${esc(rowVal(r,'ward'))}</td><td>${esc(rowVal(r,'settlement'))}</td><td>${esc(rowVal(r,'code'))}</td><td>${fmt(popVal(r))}</td></tr>`).join('')||'<tr><td colspan="6">No records in this selection.</td></tr>';$('recordTable').innerHTML=visibleRows.slice(0,50).map(r=>`<tr><td>${esc(rowVal(r,'ward'))}</td><td>${esc(rowVal(r,'settlement'))}</td><td>${esc(rowVal(r,'code'))}</td><td>${fmt(popVal(r))}</td></tr>`).join('')||'<tr><td colspan="4">No records.</td></tr>';}
+function exportCsv(){if(!visibleRows.length)return alert('No settlement records to export.');let cols=['lga','hdistrict','hward','SETTLEMENT_Name','hsettlement','population'];let lines=[cols.join(','),...visibleRows.map(r=>cols.map(c=>'"'+String(r[c]??'').replace(/"/g,'""')+'"').join(','))];download('GBoS_settlement_population_filtered.csv','\ufeff'+lines.join('\n'),'text/csv;charset=utf-8');}function download(name,data,type){let u=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}function exportGeo(){if(!visibleGeo.length)return alert('No EA polygons in current filter.');download('GBoS_Census_EAs_filtered.geojson',JSON.stringify({type:'FeatureCollection',features:visibleGeo},null,2),'application/geo+json');}
+async function loadData(){status('Fetching Excel settlement table and EA GeoJSON independently…');$('joinInfo').textContent='Loading two independent files. No join will be attempted.';try{let results=await Promise.allSettled([fetchFirst(GEO_PATHS,'json'),fetchFirst(XLS_PATHS,'xlsx')]);let geoResult=results[0],xlsResult=results[1],msgs=[];if(geoResult.status==='fulfilled'){let g=geoResult.value.data;if(!g||!Array.isArray(g.features))throw Error('The GeoJSON is not a valid FeatureCollection.');geoFeatures=g.features;fill('geoLga',geoFeatures.map(gLga),'All EA LGAs');refreshGeoSelectors();drawGeo();msgs.push(`<b>EA GeoJSON:</b> Loaded ${fmt(geoFeatures.length)} polygons<br><span class="note">${esc(geoResult.value.url)}</span>`);}else{geoFeatures=[];msgs.push(`<b>EA GeoJSON:</b> Failed — ${esc(geoResult.reason.message)}`);}if(xlsResult.status==='fulfilled'){let wb=XLSX.read(xlsResult.value.data,{type:'array'}),sheet=wb.Sheets[wb.SheetNames[0]];settlementRows=XLSX.utils.sheet_to_json(sheet,{defval:null,raw:true});if(!settlementRows.length)throw Error('The first Excel worksheet is empty.');let sample=settlementRows[0],missing=Object.entries(fields).filter(([k,names])=>!keyOf(sample,names)).map(x=>x[0]);if(missing.length)throw Error('Excel fields not found: '+missing.join(', ')+'. Expected lga, hdistrict, hward, SETTLEMENT_Name, hsettlement, population.');fill('lga',settlementRows.map(r=>rowVal(r,'lga')),'All LGAs');refreshSettlementSelectors();renderAnalytics();msgs.push(`<b>Excel settlement table:</b> Loaded ${fmt(settlementRows.length)} records<br><span class="note">${esc(xlsResult.value.url)}</span><br><b>Detected fields:</b> lga, hdistrict, hward, SETTLEMENT_Name, hsettlement, population`);}else{settlementRows=[];msgs.push(`<b>Excel settlement table:</b> Failed — ${esc(xlsResult.reason.message)}`);} $('joinInfo').innerHTML=msgs.join('<hr>')+'<hr><b>Join status:</b> Not applicable — datasets are loaded separately.<br><b>EA-to-settlement matching:</b> Not performed.';let ok=geoResult.status==='fulfilled'&&xlsResult.status==='fulfilled';status(ok?`Loaded independently: ${fmt(geoFeatures.length)} EA polygons and ${fmt(settlementRows.length)} settlement records`:'One or more datasets could not be loaded',ok?'ok':'err');$('lastUpdated').textContent='Loaded '+new Date().toLocaleString();if(!ok)console.warn('One data source failed',results);}catch(e){console.error(e);status('Data loading failed: '+e.message,'err');$('joinInfo').textContent=e.message;}}
+function downloadReset(){['lga','district','ward','settlement','settlementCode','geoLga','geoDistrict','geoWard'].forEach(id=>$(id).value='');refreshSettlementSelectors();refreshGeoSelectors();drawGeo();renderAnalytics();}
+$('lga').onchange=refreshSettlementSelectors;$('district').onchange=refreshSettlementSelectors;$('ward').onchange=refreshSettlementSelectors;$('settlement').onchange=refreshSettlementSelectors;$('geoLga').onchange=()=>{refreshGeoSelectors();drawGeo();};$('geoDistrict').onchange=()=>{refreshGeoSelectors();drawGeo();};$('geoWard').onchange=drawGeo;$('applyBtn').onclick=renderAnalytics;$('mapStyle').onchange=drawGeo;$('reloadBtn').onclick=loadData;$('resetBtn').onclick=downloadReset;$('csvBtn').onclick=exportCsv;$('geoBtn').onclick=exportGeo;$('zoomBtn').onclick=()=>map.setView([13.45,-15.55],8);$('searchBtn').onclick=()=>{let q=norm($('searchEA').value);if(!q)return;let f=geoFeatures.find(f=>[gEa(f),gLga(f),gDistrict(f),gWard(f)].some(v=>norm(v).includes(q)));if(!f)return alert('No matching EA attribute found.');let layer=eaLayer?.getLayers().find(x=>x.feature===f);if(layer){map.fitBounds(layer.getBounds(),{maxZoom:15});layer.openPopup();}};
 loadData();
-</script>
-</body>
-</html>
+</script></body></html>
