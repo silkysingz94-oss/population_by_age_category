@@ -1,1160 +1,319 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gambia Weather Forecast Intelligence | GBoS GEOAI</title>
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102a43">
+<title>SILKYSINGZ GEOAI | POPULATION BY AGE CATEGORY</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-
 <style>
-:root {
-  --navy:#10233f;
-  --blue:#1769aa;
-  --cyan:#13a8c7;
-  --bg:#edf2f7;
-  --panel:#ffffff;
-  --text:#243447;
-  --muted:#718096;
-  --border:#dce4ed;
-  --green:#15966b;
-  --orange:#e49a2d;
-  --red:#d9534f;
-}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-body{overflow:hidden}
-.app{height:100vh;display:flex;flex-direction:column}
-.header{
-  height:66px;min-height:66px;background:var(--navy);color:white;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 18px;gap:12px;z-index:1000
-}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{
-  width:39px;height:39px;border-radius:10px;
-  background:linear-gradient(135deg,#14b8a6,#1769aa);
-  display:grid;place-items:center;font-weight:bold;font-size:19px
-}
-.brand h1{font-size:16px;margin:0}
-.brand small{display:block;font-size:10px;color:#b9d3e8;margin-top:4px}
-.header-right{font-size:11px;color:#d5e4f2;text-align:right}
-.main{
-  flex:1;min-height:0;display:grid;
-  grid-template-columns:310px minmax(300px,1fr) 335px;
-  gap:9px;padding:9px
-}
-.panel{
-  background:var(--panel);border:1px solid var(--border);
-  border-radius:10px;min-height:0;overflow-y:auto;
-  overflow-x:hidden;padding:13px
-}
-.panel::-webkit-scrollbar{width:6px}
-.panel::-webkit-scrollbar-thumb{background:#b9c7d6;border-radius:10px}
-.section-title{
-  font-size:12px;font-weight:700;color:var(--navy);
-  text-transform:uppercase;letter-spacing:.6px;
-  border-bottom:1px solid var(--border);
-  padding-bottom:9px;margin:3px 0 12px
-}
-.field{margin-bottom:11px}
-label{display:block;font-size:11px;font-weight:700;margin-bottom:5px;color:#526477}
-input,select,button{
-  width:100%;height:35px;border:1px solid #d5dee8;
-  border-radius:6px;padding:0 9px;background:#fff;
-  color:#243447;font-size:12px
-}
-button{cursor:pointer;font-weight:700;background:var(--blue);color:white;border:0}
-button:hover{filter:brightness(.94)}
-button.secondary{background:#eaf1f8;color:var(--navy);border:1px solid #d7e2ee}
-button.success{background:var(--green)}
-button.dark{background:var(--navy)}
-.button-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0}
-.button-row.three{grid-template-columns:repeat(3,1fr)}
-.note{font-size:10px;line-height:1.5;color:var(--muted)}
-.status{
-  padding:9px;border-radius:6px;background:#edf5fc;
-  border-left:3px solid var(--blue);font-size:11px;line-height:1.5;
-  margin:9px 0
-}
-.status.error{background:#fff0ef;border-color:var(--red);color:#9c3532}
-.status.success{background:#eaf8f1;border-color:var(--green);color:#176c4e}
-.map-panel{
-  min-width:0;min-height:0;position:relative;
-  background:white;border:1px solid var(--border);
-  border-radius:10px;overflow:hidden;display:flex;flex-direction:column
-}
-.map-toolbar{
-  height:43px;min-height:43px;display:flex;align-items:center;
-  justify-content:space-between;padding:0 11px;border-bottom:1px solid var(--border);
-  gap:8px
-}
-.map-toolbar strong{font-size:12px}
-.map-toolbar select{width:auto;min-width:125px;height:29px}
-#map{flex:1;min-height:0;width:100%;z-index:1}
-.map-bottom{
-  min-height:42px;padding:7px 11px;border-top:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  font-size:10px;color:var(--muted);gap:10px
-}
-.legend{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.legend-item{display:flex;align-items:center;gap:4px}
-.swatch{width:10px;height:10px;border-radius:2px}
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
-.kpi{
-  background:#f5f8fb;border:1px solid #e4ebf2;
-  padding:10px;border-radius:8px;min-width:0
-}
-.kpi .value{font-size:20px;font-weight:700;color:var(--navy);margin:5px 0}
-.kpi .label{font-size:10px;color:var(--muted)}
-.weather-card{
-  border-radius:9px;padding:14px;color:white;
-  background:linear-gradient(135deg,#1769aa,#13a8c7);margin-bottom:12px
-}
-.weather-card .temp{font-size:35px;font-weight:700;margin:6px 0}
-.weather-card .description{font-size:12px}
-.weather-card .place{font-size:11px;opacity:.9}
-.weather-details{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
-.weather-details div{background:#ffffff20;padding:8px;border-radius:6px;font-size:10px}
-.weather-details strong{display:block;font-size:13px;margin-top:4px}
-.chart-box{height:190px;margin:8px 0 17px;position:relative}
-.forecast-day{
-  display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid #edf0f4;padding:8px 3px;font-size:11px
-}
-.forecast-day strong{color:var(--navy)}
-.forecast-day span{color:var(--muted)}
-.small-btn{height:29px;font-size:10px}
-.footer{
-  min-height:29px;background:var(--navy);color:#d2dfeb;
-  display:flex;justify-content:space-between;align-items:center;
-  padding:0 14px;font-size:9px;gap:8px
-}
-.hidden{display:none!important}
-.loading{opacity:.65;pointer-events:none}
-@media(max-width:900px){
- .main{grid-template-columns:260px minmax(250px,1fr) 280px}
-}
-@media(max-width:700px){
- body{overflow:auto}
- .app{height:auto;min-height:100vh}
- .header{height:auto;min-height:65px}
- .main{display:flex;flex-direction:column;min-height:0}
- .panel{max-height:430px;min-height:250px}
- .map-panel{height:550px;min-height:550px;order:-1}
- .footer{flex-wrap:wrap;padding:8px}
-}
+:root{--navy:#102a43;--blue:#176b87;--teal:#0e7490;--gold:#e3a008;--bg:#eef3f6;--panel:#fff;--line:#dce5eb;--muted:#64748b;--ink:#172b4d}
+*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{height:76px;background:linear-gradient(110deg,#102a43,#14566b);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:18px}
+.brand{display:flex;align-items:center;gap:13px}.mark{width:42px;height:42px;border:1px solid #8bc4d2;border-radius:12px;display:grid;place-items:center;font-weight:900;color:#b8e2eb;font-size:17px}.brand h1{font-size:17px;letter-spacing:.7px;margin:0}.brand p{font-size:11px;color:#c8dce5;margin:4px 0 0}.header-right{text-align:right;font-size:11px;color:#d7e8ee}.header-right strong{display:block;font-size:12px;color:#fff;margin-bottom:4px}
+.statusbar{height:34px;background:#e1edf2;border-bottom:1px solid #cbd9e1;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:11px;color:#35566a}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#d99b18;margin-right:7px}.dot.ok{background:#15966a}.dot.err{background:#c2413b}
+main{height:calc(100vh - 140px);min-height:580px;display:grid;grid-template-columns:minmax(260px, .9fr) minmax(420px,1.55fr) minmax(280px,.95fr);gap:10px;padding:10px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:11px;min-width:0;overflow:auto;box-shadow:0 2px 8px #102a4308}.panel-head{padding:14px 15px 10px;border-bottom:1px solid #edf1f4}.panel-head h2{font-size:13px;margin:0;color:#153b53;text-transform:uppercase;letter-spacing:.65px}.panel-head p{font-size:10px;color:var(--muted);margin:5px 0 0}.section{padding:12px 14px;border-bottom:1px solid #edf1f4}.section h3{font-size:11px;text-transform:uppercase;letter-spacing:.55px;color:#446174;margin:0 0 10px}.field{margin:0 0 10px}.field label{display:block;font-size:10px;color:#536b7b;font-weight:700;margin-bottom:5px}.field select,.field input{width:100%;border:1px solid #d5e0e7;border-radius:6px;padding:8px 9px;font-size:11px;background:#fff;color:#20394b;outline:none}.field select:focus,.field input:focus{border-color:#2783a0;box-shadow:0 0 0 2px #2783a01a}
+.btnrow{display:flex;gap:7px;flex-wrap:wrap}.btn{border:0;border-radius:6px;padding:8px 10px;font-size:10px;font-weight:700;cursor:pointer;background:#176b87;color:white}.btn.secondary{background:#e8f0f4;color:#24475b}.btn.gold{background:#e3a008;color:#172b4d}.btn:disabled{opacity:.5;cursor:not-allowed}
+.note{font-size:10px;line-height:1.5;color:#64748b}.map-panel{display:flex;flex-direction:column;overflow:hidden;position:relative}.map-toolbar{padding:10px 12px;border-bottom:1px solid #e7edf1;display:flex;align-items:center;justify-content:space-between;gap:8px}.map-toolbar strong{font-size:12px;color:#24475b}.map-toolbar select{border:1px solid #d5e0e7;border-radius:6px;padding:6px;font-size:10px}#map{flex:1;min-height:320px;background:#e6edf0}.map-bottom{padding:9px 12px;border-top:1px solid #e7edf1;display:flex;justify-content:space-between;gap:12px;align-items:center}.legend{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:9px;color:#536b7b}.swatch{width:13px;height:9px;border:1px solid #ffffffaa;display:inline-block}.map-caption{font-size:9px;color:#738494}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}.kpi{border:1px solid #e4ebef;border-radius:8px;padding:10px;background:#fbfdfe}.kpi .v{font-size:20px;font-weight:800;color:#14566b;line-height:1.1;word-break:break-word}.kpi .l{font-size:9px;color:#718394;margin-top:5px;text-transform:uppercase;letter-spacing:.35px}
+.chartbox{padding:11px 13px;border-bottom:1px solid #edf1f4}.chartbox h3{font-size:11px;margin:0 0 8px;color:#36566a}.chartbox canvas{width:100%!important;max-height:220px}.tablewrap{overflow:auto;max-height:260px}.table{width:100%;border-collapse:collapse;font-size:10px}.table th,.table td{text-align:left;padding:7px 6px;border-bottom:1px solid #edf1f4;white-space:nowrap}.table th{background:#f5f8fa;color:#506879;position:sticky;top:0}.empty{padding:15px;color:#748494;font-size:11px;text-align:center}.selection{padding:11px 13px;font-size:10px;line-height:1.55;color:#486174}.selection strong{color:#183e55}
+footer{height:30px;background:#102a43;color:#d8e8ee;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font-size:9px;gap:10px}
+.leaflet-popup-content{font-size:11px;line-height:1.5}.leaflet-popup-content b{color:#14566b}
+@media(max-width:1050px){main{grid-template-columns:260px minmax(350px,1fr);height:auto;min-height:calc(100vh - 140px)}#analyticsPanel{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}#analyticsPanel .panel-head{grid-column:1/-1}#analyticsPanel .kpis{grid-column:1/-1}}
+@media(max-width:700px){header{height:auto;min-height:72px;padding:12px}.header-right{display:none}.statusbar{font-size:9px}main{display:flex;flex-direction:column;height:auto;min-height:0}.panel{max-height:none}.map-panel{height:570px;order:1}#controlsPanel{order:0}#analyticsPanel{order:2;display:block}#map{min-height:420px}footer{height:auto;min-height:36px;padding:8px;flex-direction:column;text-align:center}}
 </style>
 </head>
-
 <body>
-<div class="app">
-
-<header class="header">
-  <div class="brand">
-    <div class="logo">G</div>
-    <div>
-      <h1>GAMBIA WEATHER FORECAST INTELLIGENCE</h1>
-      <small>GBoS GEOAI • Census Enumeration Area Spatial Platform</small>
-    </div>
-  </div>
-  <div class="header-right">
-    <div>THE GAMBIA</div>
-    <div id="clock">Weather Intelligence System</div>
-  </div>
+<header>
+ <div class="brand"><div class="mark">G</div><div><h1>SILKYSINGZ GEOAI · POPULATION INTELLIGENCE</h1><p>Census Enumeration Area Mapping & Age Structure Analysis · The Gambia</p></div></div>
+ <div class="header-right"><strong>GIS-CARTOGRAPHY UNIT</strong>Population by Age Category · Interactive Web GIS</div>
 </header>
-
-<main class="main">
-
-<!-- LEFT CONTROL PANEL -->
-<aside class="panel" id="leftPanel">
-
-  <div class="section-title">01 • Geographic data</div>
-
-  <div class="field">
-    <label>Load Census EA GeoJSON</label>
-    <input type="file" id="geoFile" accept=".json,.geojson,application/geo+json">
+<div class="statusbar"><span><i id="statusDot" class="dot"></i><span id="statusText">Connecting to GitHub data sources…</span></span><span id="lastUpdated">Automatic repository data loading</span></div>
+<main>
+ <aside class="panel" id="controlsPanel">
+  <div class="panel-head"><h2>01 · Controls & filters</h2><p>Filter census geography and population attributes.</p></div>
+  <div class="section">
+   <h3>Data connection</h3>
+   <div class="field"><label>Data status</label><input id="dataStatus" value="Waiting for data…" readonly></div>
+   <div class="btnrow"><button class="btn" id="reloadBtn">Reload GitHub data</button><button class="btn secondary" id="resetBtn">Reset filters</button></div>
+   <p class="note" style="margin:9px 0 0">The application attempts the repository root and /data/ folder automatically. No manual upload is required.</p>
   </div>
-
-  <div class="button-row">
-    <button id="sampleBtn" class="secondary">Load URL</button>
-    <button id="clearBtn" class="secondary">Clear data</button>
+  <div class="section">
+   <h3>Administrative selection</h3>
+   <div class="field"><label>Local Government Area</label><select id="lga"><option value="">All LGAs</option></select></div>
+   <div class="field"><label>District</label><select id="district"><option value="">All districts</option></select></div>
+   <div class="field"><label>Ward</label><select id="ward"><option value="">All wards</option></select></div>
+   <div class="field"><label>Enumeration Area</label><select id="ea"><option value="">All enumeration areas</option></select></div>
+   <div class="field"><label>Age category / map variable</label><select id="mapMetric"><option value="total">Total population (from age data)</option></select></div>
+   <div class="btnrow"><button class="btn" id="applyBtn">Apply filters</button></div>
   </div>
-
-  <div class="note">
-    Select your local <b>Census_EAs_Geo.json</b> file. The application reads
-    EA boundaries and available attributes directly from the GeoJSON.
+  <div class="section">
+   <h3>Map settings</h3>
+   <div class="field"><label>Basemap</label><select id="basemap"><option value="street">Street map</option><option value="satellite">Satellite</option><option value="topo">Terrain</option><option value="dark">Dark</option></select></div>
+   <div class="field"><label>Polygon display</label><select id="mapStyle"><option value="choropleth">Population choropleth</option><option value="outline">EA boundaries only</option></select></div>
+   <div class="field"><label>Search EA / settlement / code</label><input id="searchEA" placeholder="Type EA name or code…"></div>
+   <div class="btnrow"><button class="btn secondary" id="searchBtn">Find on map</button><button class="btn secondary" id="zoomBtn">Zoom to Gambia</button></div>
   </div>
-
-  <div id="dataStatus" class="status">Waiting for Census_EAs_Geo.json.</div>
-
-  <div class="section-title">02 • Administrative filters</div>
-
-  <div class="field">
-    <label>Local Government Area</label>
-    <select id="lgaSelect" disabled><option value="">All LGAs</option></select>
+  <div class="section">
+   <h3>Exports</h3>
+   <div class="btnrow"><button class="btn secondary" id="csvBtn">Export filtered CSV</button><button class="btn secondary" id="geoBtn">Export filtered GeoJSON</button></div>
+   <p class="note">Exports reflect the current administrative selection and joined population attributes.</p>
   </div>
-
-  <div class="field">
-    <label>District</label>
-    <select id="districtSelect" disabled><option value="">All districts</option></select>
+  <div class="section">
+   <h3>Join & data validation</h3>
+   <div id="joinInfo" class="note">Waiting for the Excel workbook and EA boundaries.</div>
   </div>
+ </aside>
 
-  <div class="field">
-    <label>Ward</label>
-    <select id="wardSelect" disabled><option value="">All wards</option></select>
-  </div>
-
-  <div class="field">
-    <label>Enumeration Area</label>
-    <select id="eaSelect" disabled><option value="">All enumeration areas</option></select>
-  </div>
-
-  <div class="button-row">
-    <button id="applyBtn">Apply filters</button>
-    <button id="resetBtn" class="secondary">Reset filters</button>
-  </div>
-
-  <div class="section-title">03 • Weather location</div>
-
-  <div class="field">
-    <label>Weather search method</label>
-    <select id="locationMode">
-      <option value="ea">Selected EA centroid</option>
-      <option value="gps">My current GPS location</option>
-      <option value="manual">Manual coordinates</option>
-    </select>
-  </div>
-
-  <div id="manualCoordinates" class="hidden">
-    <div class="field">
-      <label>Latitude</label>
-      <input id="latitude" type="number" step="any" placeholder="13.4549">
-    </div>
-    <div class="field">
-      <label>Longitude</label>
-      <input id="longitude" type="number" step="any" placeholder="-16.5790">
-    </div>
-  </div>
-
-  <div class="button-row">
-    <button id="weatherBtn" class="success">Get weather</button>
-    <button id="gpsBtn" class="secondary">Use GPS</button>
-  </div>
-
-  <div class="section-title">04 • Forecast settings</div>
-
-  <div class="field">
-    <label>Forecast period</label>
-    <select id="forecastDays">
-      <option value="3">3 days</option>
-      <option value="5">5 days</option>
-      <option value="7" selected>7 days</option>
-      <option value="14">14 days</option>
-    </select>
-  </div>
-
-  <div class="field">
-    <label>Temperature units</label>
-    <select id="temperatureUnit">
-      <option value="celsius">Celsius (°C)</option>
-      <option value="fahrenheit">Fahrenheit (°F)</option>
-    </select>
-  </div>
-
-  <div class="section-title">05 • Data exports</div>
-
-  <div class="button-row">
-    <button id="exportEA" class="secondary">Export EA CSV</button>
-    <button id="exportWeather" class="secondary">Export weather</button>
-  </div>
-
-  <div class="note">
-    EA statistics are calculated from the loaded GeoJSON attributes.
-    Weather forecasts are retrieved from Open-Meteo.
-  </div>
-
-</aside>
-
-<!-- CENTRE MAP: FIXED, NON-SCROLLABLE -->
-<section class="map-panel">
-
-  <div class="map-toolbar">
-    <strong>INTERACTIVE ENUMERATION AREA MAP</strong>
-    <select id="baseMap">
-      <option value="osm">OpenStreetMap</option>
-      <option value="satellite">Satellite</option>
-      <option value="terrain">Terrain</option>
-      <option value="dark">Dark basemap</option>
-    </select>
-  </div>
-
+ <section class="panel map-panel">
+  <div class="map-toolbar"><strong>02 · Interactive Census Enumeration Area Map</strong><span id="visibleCount" class="note">0 EAs displayed</span></div>
   <div id="map"></div>
+  <div class="map-bottom"><div class="legend" id="legend"><b>Population legend</b><span class="note">Waiting for data</span></div><div class="map-caption">© OpenStreetMap · © Esri · Leaflet</div></div>
+  <div class="selection" id="selectedInfo"><strong>Selected EA:</strong> Click an enumeration area to inspect its attributes and age structure.</div>
+ </section>
 
-  <div class="map-bottom">
-    <div class="legend">
-      <div class="legend-item"><span class="swatch" style="background:#2c83ba"></span> EA boundaries</div>
-      <div class="legend-item"><span class="swatch" style="background:#e49a2d"></span> Selected EA</div>
-      <div class="legend-item"><span class="swatch" style="background:#15966b"></span> Weather location</div>
-    </div>
-    <span id="mapCount">0 EAs displayed</span>
+ <aside class="panel" id="analyticsPanel">
+  <div class="panel-head"><h2>03 · Analytics & results</h2><p>Statistics update with the selected administrative filters.</p></div>
+  <div class="kpis">
+   <div class="kpi"><div class="v" id="kpiEAs">—</div><div class="l">Visible EAs</div></div>
+   <div class="kpi"><div class="v" id="kpiPop">—</div><div class="l">Population total</div></div>
+   <div class="kpi"><div class="v" id="kpiLgas">—</div><div class="l">LGAs represented</div></div>
+   <div class="kpi"><div class="v" id="kpiMatched">—</div><div class="l">Matched EAs</div></div>
   </div>
-
-</section>
-
-<!-- RIGHT ANALYTICS PANEL -->
-<aside class="panel" id="rightPanel">
-
-  <div class="section-title">06 • Census geography overview</div>
-
-  <div class="kpi-grid">
-    <div class="kpi">
-      <div class="label">Total EAs</div>
-      <div class="value" id="totalEAs">0</div>
-    </div>
-    <div class="kpi">
-      <div class="label">Selected EAs</div>
-      <div class="value" id="selectedEAs">0</div>
-    </div>
-    <div class="kpi">
-      <div class="label">Population</div>
-      <div class="value" id="totalPopulation">—</div>
-    </div>
-    <div class="kpi">
-      <div class="label">LGAs</div>
-      <div class="value" id="totalLGAs">0</div>
-    </div>
-  </div>
-
-  <div class="section-title">07 • Weather conditions</div>
-
-  <div class="weather-card">
-    <div class="place" id="weatherPlace">No weather location selected</div>
-    <div class="temp" id="currentTemp">--°</div>
-    <div class="description" id="weatherDescription">Waiting for weather data</div>
-
-    <div class="weather-details">
-      <div>Feels like<strong id="feelsLike">--</strong></div>
-      <div>Humidity<strong id="humidity">--</strong></div>
-      <div>Wind speed<strong id="windSpeed">--</strong></div>
-      <div>Precipitation<strong id="precipitation">--</strong></div>
-    </div>
-  </div>
-
-  <div class="kpi-grid">
-    <div class="kpi">
-      <div class="label">Daily maximum</div>
-      <div class="value" id="maxTemp">--</div>
-    </div>
-    <div class="kpi">
-      <div class="label">Daily minimum</div>
-      <div class="value" id="minTemp">--</div>
-    </div>
-  </div>
-
-  <div class="section-title">08 • Hourly temperature</div>
-  <div class="chart-box"><canvas id="hourlyChart"></canvas></div>
-
-  <div class="section-title">09 • Seven-day temperature outlook</div>
-  <div class="chart-box"><canvas id="dailyChart"></canvas></div>
-
-  <div class="section-title">10 • Daily forecast</div>
-  <div id="forecastList" class="note">Weather forecast will appear here.</div>
-
-  <div class="section-title" style="margin-top:15px">11 • Selected EA details</div>
-  <div id="eaDetails" class="note">Select an enumeration area to view its attributes.</div>
-
-  <div class="section-title" style="margin-top:15px">12 • Methodology and data</div>
-  <div class="note">
-    <b>Geographic source:</b> Census_EAs_Geo.json supplied by the user.<br><br>
-    <b>Weather source:</b> Open-Meteo forecast API.<br><br>
-    <b>Spatial method:</b> Enumeration Area polygon centroid is used as the
-    representative weather coordinate. A centroid is not necessarily a
-    settlement or meteorological station location.<br><br>
-    <b>Forecast interpretation:</b> Weather conditions are model-based
-    estimates and should not be interpreted as ground observations or
-    official Gambia Meteorological Services forecasts.
-  </div>
-
-</aside>
+  <div class="chartbox"><h3>Population by age category</h3><canvas id="ageChart"></canvas><div class="note" id="ageNote">Age category totals will appear after the workbook is loaded.</div></div>
+  <div class="chartbox"><h3>Population by sex</h3><canvas id="sexChart"></canvas><div class="note" id="sexNote">Displayed only when sex-disaggregated fields are present in the workbook.</div></div>
+  <div class="chartbox"><h3>Top 10 EAs by selected population</h3><div class="tablewrap"><table class="table"><thead><tr><th>Enumeration Area</th><th>District</th><th>Population</th></tr></thead><tbody id="topTable"><tr><td colspan="3">Waiting for data…</td></tr></tbody></table></div></div>
+  <div class="chartbox"><h3>Administrative summary</h3><div class="tablewrap"><table class="table"><thead><tr><th>Local Government Area</th><th>EAs</th><th>Population</th></tr></thead><tbody id="adminTable"><tr><td colspan="3">Waiting for data…</td></tr></tbody></table></div></div>
+  <div class="chartbox"><h3>Methodology & interpretation</h3><div class="note">Population records are joined to Census EA polygons using a shared EA identifier where available. The application tests common fields such as feacode, FEA_Code, EA_code and Join_ID. Age-group totals are calculated from the workbook records and are not estimated. Unmatched records are reported in the join diagnostics. Results depend on the source workbook's geographic coverage and definitions; do not interpret missing values as zero population.</div></div>
+ </aside>
 </main>
+<footer><span><strong>Produced by Ansu Singhateh</strong> · GIS Analyst | GIS-Cartography Unit | Gambia Bureau of Statistics</span><span>GEOAI · Research and educational use · Data: supplied census datasets</span></footer>
 
-<footer class="footer">
-  <span>Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit</span>
-  <span>GBoS GEOAI • Independent research and educational prototype</span>
-</footer>
-
-</div>
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
-/* ============================================================
-   GAMBIA WEATHER FORECAST INTELLIGENCE
-   Geographic source: Census_EAs_Geo.json
-   Weather source: Open-Meteo
-   ============================================================ */
-
-const $ = id => document.getElementById(id);
-
-let originalFeatures = [];
-let filteredFeatures = [];
-let geoLayer = null;
-let selectedLayer = null;
-let weatherMarker = null;
-let currentWeather = null;
-let hourlyChart = null;
-let dailyChart = null;
-let selectedWeatherLocation = null;
-
-const map = L.map('map', {
-  zoomControl:true,
-  preferCanvas:true
-}).setView([13.4432,-15.3101],8);
-
-const baseLayers = {
-  osm:L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    maxZoom:19,attribution:'© OpenStreetMap'
-  }),
-  satellite:L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    {maxZoom:19,attribution:'© Esri'}
-  ),
-  terrain:L.tileLayer(
-    'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    {maxZoom:17,attribution:'© OpenTopoMap'}
-  ),
-  dark:L.tileLayer(
-    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    {maxZoom:19,attribution:'© CARTO'}
-  )
+"use strict";
+const OWNER="silkysingz94-oss", REPO="population_by_age_category", BRANCH="main";
+const ROOT=`https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/`;
+const GEO_CANDIDATES=["Census_EAs_Geo.json","data/Census_EAs_Geo.json","Census_EAs_Geo(1).json"];
+const XLS_CANDIDATES=["population_by_age_category.xlsx","data/population_by_age_category.xlsx"];
+const $=id=>document.getElementById(id);
+let allFeatures=[], joinedFeatures=[], visibleFeatures=[], ageKeys=[], sexKeys=[], ageChart=null,sexChart=null,geoLayer=null,selectedLayer=null;
+let mapMetric="total", workbookRows=[], joinKeyGeo="",joinKeyXls="", ageLabelMap={};
+const fmt=n=>Number.isFinite(Number(n))?Number(n).toLocaleString("en-US",{maximumFractionDigits:0}):"—";
+const norm=s=>String(s??"").toLowerCase().trim().replace(/[\s_\-./]+/g,"").replace(/[^a-z0-9]/g,"");
+const num=v=>{if(v===null||v===undefined||v==="")return null;const n=Number(String(v).replace(/[, ]/g,""));return Number.isFinite(n)?n:null};
+const unique=a=>[...new Set(a.filter(v=>v!==null&&v!==undefined&&String(v).trim()!=="").map(String))].sort((a,b)=>a.localeCompare(b));
+function setStatus(msg,type=""){ $("statusText").textContent=msg;$("dataStatus").value=msg;$("statusDot").className="dot "+(type==="ok"?"ok":type==="err"?"err":"");}
+async function fetchFirst(paths,kind){
+ let errors=[];
+ for(const p of paths){try{const url=ROOT+p+(p.includes("?")?"&":"?")+"v="+Date.now();const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error(`${r.status} ${r.statusText}`);return {buffer:kind==="xlsx"?await r.arrayBuffer():await r.json(),url};}catch(e){errors.push(p+": "+e.message);}}
+ throw new Error(errors.join(" | "));
+}
+const map=L.map("map",{zoomControl:true,preferCanvas:true}).setView([13.45,-15.55],8);
+const baseLayers={
+ street:L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"}),
+ satellite:L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles © Esri"}),
+ topo:L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:"© OpenTopoMap"}),
+ dark:L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19,attribution:"© CARTO"})
 };
-
-let activeBase = baseLayers.osm.addTo(map);
-
-$('baseMap').addEventListener('change',e=>{
-  map.removeLayer(activeBase);
-  activeBase=baseLayers[e.target.value];
-  activeBase.addTo(map);
-});
-
-function numberFormat(value){
-  return Number(value).toLocaleString('en-US',{
-    maximumFractionDigits:0
-  });
+let activeBase=baseLayers.street.addTo(map);
+$("basemap").addEventListener("change",e=>{map.removeLayer(activeBase);activeBase=baseLayers[e.target.value].addTo(map);});
+const palette=["#ffffcc","#ffeda0","#fed976","#feb24c","#fd8d3c","#f03b20","#bd0026"];
+function fieldMatch(obj,candidates){const keys=Object.keys(obj||{});for(const c of candidates){const k=keys.find(x=>norm(x)===norm(c));if(k)return k;}return null;}
+function detectGeoKey(props){return fieldMatch(props,["feacode","FEA_Code","EA_code","eaname","Join_ID","FID","OBJECTID_1"]);}
+function detectExcelKey(row){return fieldMatch(row,["feacode","FEA_Code","EA_code","ea_code","enumeration_area_code","EA code","ea","join_id","Join_ID","code"]);}
+function detectPopulationColumns(headers){
+ const ageWords=/age|under|below|years|year|0.?4|5.?9|10.?14|15.?19|20.?24|25.?29|30.?34|35.?39|40.?44|45.?49|50.?54|55.?59|60.?64|65|elder|youth|child|working/i;
+ const skip=/code|name|lga|district|ward|sex|gender|total|population|pop|ea|fid|id|serial|remark|sheet/i;
+ return headers.filter(h=>ageWords.test(String(h))&&!skip.test(String(h)) || /^(male|female)[ _-]?(0|under|[1-9]|[0-9]{2})/i.test(String(h)));
 }
-
-function normalize(value){
-  return String(value ?? '').trim().toLowerCase();
+function detectLongColumns(row){
+ return {age:fieldMatch(row,["age_category","age group","age_group","age category","category","age_range","age range"]),
+ pop:fieldMatch(row,["population","pop","count","total_population","value"]),
+ sex:fieldMatch(row,["sex","gender"])};
 }
-
-function getProps(feature){
-  return feature && feature.properties ? feature.properties : {};
+function normalizeAgeName(s){return String(s).trim().replace(/[_]+/g," ").replace(/\s+/g," ");}
+function extractWorkbook(wb){
+ const sheetName=wb.SheetNames[0];const ws=wb.Sheets[sheetName];const rows=XLSX.utils.sheet_to_json(ws,{defval:null,raw:true});
+ if(!rows.length)throw new Error("The first worksheet contains no records.");
+ return rows;
 }
-
-/* Automatically identify fields from GeoJSON properties. */
-function findField(properties, candidates){
-  const keys=Object.keys(properties || {});
-  for(const candidate of candidates){
-    const match=keys.find(k=>normalize(k)===normalize(candidate));
-    if(match) return match;
+function createPopulationIndex(rows){
+ const first=rows[0], headers=Object.keys(first), idKey=detectExcelKey(first);
+ const long=detectLongColumns(first);
+ const index=new Map(), ageSet=new Set(), sexSet=new Set();
+ if(!idKey)throw new Error("Could not identify the EA join field in the Excel file. Expected a field such as feacode, EA_code or Join_ID.");
+ const ageCols=detectPopulationColumns(headers);
+ const totalKey=fieldMatch(first,["total_population","population_total","total pop","population"]);
+ const sexKey=long.sex;
+ if(long.age&&long.pop){
+   rows.forEach(row=>{
+    const id=String(row[idKey]??"").trim();if(!id)return;
+    const age=normalizeAgeName(row[long.age]??"Unspecified");const value=num(row[long.pop]);if(value===null)return;
+    ageSet.add(age);const sex=sexKey?String(row[sexKey]??"").trim():"";
+    if(!index.has(id))index.set(id,{ages:{},sexes:{},total:0});
+    const rec=index.get(id);rec.ages[age]=(rec.ages[age]||0)+value;rec.total+=value;
+    if(sex){sexSet.add(sex);rec.sexes[sex]=(rec.sexes[sex]||0)+value;}
+   });
+ } else if(ageCols.length){
+   rows.forEach(row=>{
+    const id=String(row[idKey]??"").trim();if(!id)return;
+    if(!index.has(id))index.set(id,{ages:{},sexes:{},total:0});
+    const rec=index.get(id);
+    ageCols.forEach(k=>{const v=num(row[k]);if(v!==null){const label=normalizeAgeName(k);rec.ages[label]=(rec.ages[label]||0)+v;rec.total+=v;ageSet.add(label);}});
+    if(totalKey){const t=num(row[totalKey]);if(t!==null)rec.sourceTotal=t;}
+   });
+ } else if(totalKey){
+   rows.forEach(row=>{const id=String(row[idKey]??"").trim();const v=num(row[totalKey]);if(!id||v===null)return;index.set(id,{ages:{},sexes:{},total:v,sourceTotal:v});});
+ } else {
+   throw new Error("The Excel workbook was read, but no age-category or population-value columns were detected. Check the worksheet headers.");
+ }
+ return {index,idKey,ageKeys:[...ageSet].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),sexKeys:[...sexSet],headers};
+}
+function attachPopulation(geo,pop){
+ let matched=0,missing=0;
+ const features=geo.features.map(f=>{
+  const p={...(f.properties||{})};const gKey=detectGeoKey(p);const id=gKey?String(p[gKey]??"").trim():"";
+  let rec=id?pop.index.get(id):null;
+  if(!rec && id){const normalized=norm(id);for(const [k,v] of pop.index){if(norm(k)===normalized){rec=v;break;}}}
+  if(rec){matched++;p._age=rec.ages;p._sex=rec.sexes;p._popTotal=rec.sourceTotal??rec.total;p._matched=true;}
+  else{missing++;p._age={};p._sex={};p._popTotal=null;p._matched=false;}
+  p._joinId=id;p._joinField=gKey||"Not found";
+  return {...f,properties:p};
+ });
+ return {type:"FeatureCollection",features};
+}
+function getProp(p,candidates){const k=fieldMatch(p,candidates);return k?p[k]:"";}
+function lgaOf(f){return String(getProp(f.properties,["lganame","lga","local_government_area"])||"Unknown");}
+function districtOf(f){return String(getProp(f.properties,["distname","district","hdistrict"])||"Unknown");}
+function wardOf(f){return String(getProp(f.properties,["wardname","ward","hward"])||"Unknown");}
+function eaOf(f){return String(getProp(f.properties,["eaname","ea_name","settlement_name"])||f.properties._joinId||"Unnamed EA");}
+function codeOf(f){return String(getProp(f.properties,["feacode","FEA_Code","EA_code","_joinId"])||f.properties._joinId||"");}
+function featureValue(f,key){const p=f.properties;if(key==="total")return p._popTotal;return num(p._age?.[key]);}
+function currentFilters(){
+ const l=$("lga").value,d=$("district").value,w=$("ward").value,e=$("ea").value;
+ return allFeatures.filter(f=>(!l||lgaOf(f)===l)&&(!d||districtOf(f)===d)&&(!w||wardOf(f)===w)&&(!e||eaOf(f)===e));
+}
+function fillSelect(id,values,placeholder){const el=$(id),old=el.value;el.innerHTML="";const o=document.createElement("option");o.value="";o.textContent=placeholder;el.appendChild(o);unique(values).forEach(v=>{const x=document.createElement("option");x.value=v;x.textContent=v;el.appendChild(x);});if([...el.options].some(x=>x.value===old))el.value=old;}
+function refreshAdminSelectors(){
+ const l=$("lga").value,d=$("district").value,w=$("ward").value;
+ const base=allFeatures.filter(f=>!l||lgaOf(f)===l);
+ fillSelect("district",base.map(districtOf),"All districts");$("district").value=d&&[...$("district").options].some(o=>o.value===d)?d:"";
+ const base2=base.filter(f=>!$("district").value||districtOf(f)===$("district").value);
+ fillSelect("ward",base2.map(wardOf),"All wards");$("ward").value=w&&[...$("ward").options].some(o=>o.value===w)?w:"";
+ const base3=base2.filter(f=>!$("ward").value||wardOf(f)===$("ward").value);
+ fillSelect("ea",base3.map(eaOf),"All enumeration areas");
+}
+function metricOptions(){
+ const el=$("mapMetric");el.innerHTML='<option value="total">Total population (from age data)</option>';
+ ageKeys.forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=k;el.appendChild(o);});
+}
+function getBreaks(values){
+ const a=values.filter(v=>Number.isFinite(v)).sort((x,y)=>x-y);if(!a.length)return [];
+ return [0,1,2,3,4,5].map(i=>a[Math.min(a.length-1,Math.floor((a.length-1)*i/6))]);
+}
+function colorFor(v,breaks){if(v===null||v===undefined||!Number.isFinite(Number(v)))return "#cbd5e1";let i=0;for(let j=1;j<breaks.length;j++)if(Number(v)>breaks[j])i=j;return palette[Math.min(i,palette.length-1)];}
+function styleFeature(f,breaks){const v=featureValue(f,mapMetric);if($("mapStyle").value==="outline")return {color:"#31566b",weight:.7,fillColor:"#8ba9b7",fillOpacity:.10};return {color:"#fff",weight:.55,fillColor:colorFor(v,breaks),fillOpacity:.78};}
+function popupHtml(f){
+ const p=f.properties, ages=p._age||{};const items=Object.entries(ages).sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).map(([k,v])=>`<tr><td>${esc(k)}</td><td style="text-align:right">${fmt(v)}</td></tr>`).join("");
+ const sexes=Object.entries(p._sex||{}).map(([k,v])=>`<tr><td>${esc(k)}</td><td style="text-align:right">${fmt(v)}</td></tr>`).join("");
+ return `<div style="min-width:190px"><b>${esc(eaOf(f))}</b><br><span>${esc(lgaOf(f))} · ${esc(districtOf(f))} · ${esc(wardOf(f))}</span><hr><b>EA code:</b> ${esc(codeOf(f))}<br><b>Population:</b> ${p._popTotal===null?"Not matched":fmt(p._popTotal)}<br><b>Join status:</b> ${p._matched?"Matched":"No matching Excel record"}${items?`<hr><b>Age category</b><table>${items}</table>`:""}${sexes?`<hr><b>Sex</b><table>${sexes}</table>`:""}</div>`;
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function drawMap(features){
+ if(geoLayer)map.removeLayer(geoLayer);
+ const values=features.map(f=>featureValue(f,mapMetric)).filter(v=>v!==null&&Number.isFinite(Number(v)));
+ const breaks=getBreaks(values);
+ geoLayer=L.geoJSON({type:"FeatureCollection",features},{
+  style:f=>styleFeature(f,breaks),
+  onEachFeature:(f,layer)=>{
+   layer.bindPopup(popupHtml(f),{maxWidth:310});
+   layer.on("click",()=>{if(selectedLayer&&geoLayer)geoLayer.resetStyle(selectedLayer);selectedLayer=layer;layer.setStyle({color:"#111827",weight:2.5,fillOpacity:.9});showSelected(f);});
+   layer.on("mouseover",()=>{if(layer!==selectedLayer)layer.setStyle({weight:1.8,color:"#263f50"});});
+   layer.on("mouseout",()=>{if(layer!==selectedLayer)geoLayer.resetStyle(layer);});
   }
-  for(const candidate of candidates){
-    const match=keys.find(k=>normalize(k).includes(normalize(candidate)));
-    if(match) return match;
-  }
-  return null;
+ }).addTo(map);
+ $("visibleCount").textContent=features.length.toLocaleString()+" EAs displayed";
+ if(features.length){const b=geoLayer.getBounds();if(b.isValid())map.fitBounds(b,{padding:[15,15],maxZoom:12});}
+ renderLegend(breaks,values);
 }
-
-let fields={
-  lga:null,district:null,ward:null,ea:null,population:null,code:null
-};
-
-function detectFields(features){
-  const p=getProps(features[0]);
-
-  fields.lga=findField(p,[
-    'lga','lganame','lga_name','local government area',
-    'local_government_area','region'
-  ]);
-
-  fields.district=findField(p,[
-    'district','distname','district_name','hdistrict'
-  ]);
-
-  fields.ward=findField(p,[
-    'ward','wardname','ward_name','hward'
-  ]);
-
-  fields.ea=findField(p,[
-    'ea','eaname','ea_name','enumeration area',
-    'enumeration_area','feacode','ea_code'
-  ]);
-
-  fields.population=findField(p,[
-    'population','pop','sum_pop','total_population',
-    'pop_total','population_total'
-  ]);
-
-  fields.code=findField(p,[
-    'feacode','ea_code','eacode','code','id'
-  ]);
-
-  // Use a fallback if no obvious EA name field exists.
-  if(!fields.ea){
-    fields.ea=findField(p,['name','fid','objectid']);
-  }
+function renderLegend(breaks,values){
+ const el=$("legend");if(!values.length){el.innerHTML="<b>Population legend</b><span class='note'>No matched population values in selection</span>";return;}
+ const labels=palette.map((c,i)=>`<span class="swatch" style="background:${c}"></span><span>${i===0?"≤ "+fmt(breaks[1]??breaks[0]):i===6?"> "+fmt(breaks[5]):fmt(breaks[i])+"–"+fmt(breaks[i+1])}</span>`);
+ el.innerHTML="<b>"+esc(mapMetric==="total"?"Total population":mapMetric)+"</b> "+labels.join("");
 }
-
-function valueOf(feature,field){
-  if(!field) return '';
-  const value=getProps(feature)[field];
-  return value===null || value===undefined ? '' : String(value);
+function showSelected(f){
+ const p=f.properties;const ages=Object.entries(p._age||{}).map(([k,v])=>`${esc(k)}: <b>${fmt(v)}</b>`).join(" · ")||"Age detail unavailable";
+ $("selectedInfo").innerHTML=`<strong>Selected EA:</strong> ${esc(eaOf(f))} · <strong>Code:</strong> ${esc(codeOf(f))} · <strong>Population:</strong> ${p._popTotal===null?"Not matched":fmt(p._popTotal)}<br><strong>Geography:</strong> ${esc(lgaOf(f))} / ${esc(districtOf(f))} / ${esc(wardOf(f))}<br><strong>Age structure:</strong> ${ages}`;
 }
-
-function uniqueValues(features,field){
-  if(!field) return [];
-  return [...new Set(features.map(f=>valueOf(f,field)).filter(v=>v!==''))
-  ].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+function aggregate(features){
+ const age={},sex={},admin={},top=[];let total=0,matched=0;
+ features.forEach(f=>{const p=f.properties;if(p._matched)matched++;if(p._popTotal!==null){total+=Number(p._popTotal)||0;}
+ Object.entries(p._age||{}).forEach(([k,v])=>age[k]=(age[k]||0)+(Number(v)||0));
+ Object.entries(p._sex||{}).forEach(([k,v])=>sex[k]=(sex[k]||0)+(Number(v)||0));
+ const l=lgaOf(f);if(!admin[l])admin[l]={n:0,pop:0};admin[l].n++;if(p._popTotal!==null)admin[l].pop+=Number(p._popTotal)||0;
+ if(p._popTotal!==null)top.push({name:eaOf(f),district:districtOf(f),pop:Number(p._popTotal)});
+ });
+ return {total,matched,age,sex,admin,top:top.sort((a,b)=>b.pop-a.pop).slice(0,10)};
 }
-
-function fillSelect(selectId,values,defaultText){
-  const select=$(selectId);
-  const previous=select.value;
-  select.innerHTML='';
-  const first=document.createElement('option');
-  first.value='';
-  first.textContent=defaultText;
-  select.appendChild(first);
-
-  values.forEach(value=>{
-    const option=document.createElement('option');
-    option.value=value;
-    option.textContent=value;
-    select.appendChild(option);
-  });
-
-  select.disabled=values.length===0;
-  if(values.includes(previous)) select.value=previous;
+function renderCharts(stats){
+ const labels=Object.keys(stats.age).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),vals=labels.map(k=>stats.age[k]);
+ if(ageChart)ageChart.destroy();
+ ageChart=new Chart($("ageChart"),{type:"bar",data:{labels,datasets:[{label:"Population",data:vals,backgroundColor:"#2383a1",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},maxRotation:50,minRotation:0}},y:{beginAtZero:true,ticks:{font:{size:9}}}}}});
+ $("ageNote").textContent=labels.length?`Aggregated across ${stats.matched.toLocaleString()} matched EAs in the current selection.`:"No age-category columns were identified or matched.";
+ const sl=Object.keys(stats.sex),sv=sl.map(k=>stats.sex[k]);
+ if(sexChart)sexChart.destroy();
+ sexChart=new Chart($("sexChart"),{type:"doughnut",data:{labels:sl.length?sl:["No sex field"],datasets:[{data:sl.length?sv:[1],backgroundColor:["#247ba0","#e07a5f","#81b29a","#f2cc8f"]}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:"bottom",labels:{font:{size:9}}}}}});
+ $("sexNote").textContent=sl.length?"Sex totals are taken from the sex-disaggregated fields in the workbook.":"No sex-disaggregated records/columns detected; no sex estimates are inferred.";
 }
-
-function updateFilters(){
-  const lga=$('lgaSelect').value;
-  const district=$('districtSelect').value;
-  const ward=$('wardSelect').value;
-
-  const lgaFeatures=originalFeatures.filter(f=>
-    !lga || valueOf(f,fields.lga)===lga
-  );
-
-  fillSelect('districtSelect',uniqueValues(lgaFeatures,fields.district),'All districts');
-
-  const districtFeatures=lgaFeatures.filter(f=>
-    !district || valueOf(f,fields.district)===district
-  );
-
-  fillSelect('wardSelect',uniqueValues(districtFeatures,fields.ward),'All wards');
-
-  const wardFeatures=districtFeatures.filter(f=>
-    !ward || valueOf(f,fields.ward)===ward
-  );
-
-  const eaValues=uniqueValues(wardFeatures,fields.ea);
-  fillSelect('eaSelect',eaValues,'All enumeration areas');
+function renderAnalytics(features){
+ const s=aggregate(features);$("kpiEAs").textContent=fmt(features.length);$("kpiPop").textContent=fmt(s.total);$("kpiLgas").textContent=fmt(new Set(features.map(lgaOf)).size);$("kpiMatched").textContent=fmt(s.matched);
+ renderCharts(s);
+ $("topTable").innerHTML=s.top.length?s.top.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.district)}</td><td>${fmt(x.pop)}</td></tr>`).join(""):'<tr><td colspan="3">No matched population records.</td></tr>';
+ $("adminTable").innerHTML=Object.entries(s.admin).sort((a,b)=>b[1].pop-a[1].pop).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${fmt(v.n)}</td><td>${fmt(v.pop)}</td></tr>`).join("")||'<tr><td colspan="3">No data.</td></tr>';
 }
-
-$('lgaSelect').addEventListener('change',()=>{
-  $('districtSelect').value='';
-  $('wardSelect').value='';
-  $('eaSelect').value='';
-  updateFilters();
-});
-
-$('districtSelect').addEventListener('change',()=>{
-  $('wardSelect').value='';
-  $('eaSelect').value='';
-  updateFilters();
-});
-
-$('wardSelect').addEventListener('change',()=>{
-  $('eaSelect').value='';
-  updateFilters();
-});
-
-function loadGeoJSON(data){
-  if(!data || data.type!=='FeatureCollection' || !Array.isArray(data.features)){
-    throw new Error('The file must be a valid GeoJSON FeatureCollection.');
-  }
-
-  const valid=data.features.filter(f=>
-    f && f.geometry && f.geometry.coordinates &&
-    ['Polygon','MultiPolygon'].includes(f.geometry.type)
-  );
-
-  if(valid.length===0){
-    throw new Error('No polygon or multipolygon features were found.');
-  }
-
-  originalFeatures=valid;
-  detectFields(originalFeatures);
-
-  $('lgaSelect').disabled=false;
-  fillSelect('lgaSelect',uniqueValues(originalFeatures,fields.lga),'All LGAs');
-  fillSelect('districtSelect',uniqueValues(originalFeatures,fields.district),'All districts');
-  fillSelect('wardSelect',uniqueValues(originalFeatures,fields.ward),'All wards');
-  fillSelect('eaSelect',uniqueValues(originalFeatures,fields.ea),'All enumeration areas');
-
-  renderMap(originalFeatures);
-  updateStatistics(originalFeatures);
-
-  const populationText=fields.population
-    ? 'Population field detected: '+fields.population
-    : 'No population attribute detected. Population KPIs will remain unavailable.';
-
-  $('dataStatus').className='status success';
-  $('dataStatus').innerHTML=
-    '<b>GeoJSON loaded successfully.</b><br>'+
-    numberFormat(originalFeatures.length)+' polygon features loaded.<br>'+
-    populationText;
-
-  $('mapCount').textContent=numberFormat(originalFeatures.length)+' EAs displayed';
-}
-
-$('geoFile').addEventListener('change',async e=>{
-  const file=e.target.files[0];
-  if(!file) return;
-
-  try{
-    $('dataStatus').textContent='Reading GeoJSON file...';
-    const text=await file.text();
-    const data=JSON.parse(text);
-    loadGeoJSON(data);
-  }catch(error){
-    showError(error.message);
-  }
-});
-
-$('sampleBtn').addEventListener('click',async()=>{
-  const url=prompt('Enter the raw GitHub URL or hosted URL of Census_EAs_Geo.json:');
-  if(!url) return;
-
-  try{
-    $('dataStatus').textContent='Loading hosted GeoJSON...';
-    const response=await fetch(url);
-    if(!response.ok) throw new Error('Could not access the GeoJSON URL.');
-    loadGeoJSON(await response.json());
-  }catch(error){
-    showError(error.message);
-  }
-});
-
-function showError(message){
-  $('dataStatus').className='status error';
-  $('dataStatus').textContent='Error: '+message;
-}
-
-function styleFeature(){
-  return {
-    color:'#2c83ba',
-    weight:1,
-    opacity:.85,
-    fillColor:'#55a7d8',
-    fillOpacity:.13
-  };
-}
-
-function renderMap(features){
-  if(geoLayer) map.removeLayer(geoLayer);
-  if(selectedLayer) map.removeLayer(selectedLayer);
-
-  geoLayer=L.geoJSON({
-    type:'FeatureCollection',
-    features:features
-  },{
-    style:styleFeature,
-    onEachFeature:(feature,layer)=>{
-      const name=valueOf(feature,fields.ea)||'Unnamed EA';
-      const ward=valueOf(feature,fields.ward);
-      const district=valueOf(feature,fields.district);
-      const lga=valueOf(feature,fields.lga);
-      layer.bindPopup(
-        '<b>'+escapeHTML(name)+'</b><br>'+
-        'Ward: '+escapeHTML(ward||'Not available')+'<br>'+
-        'District: '+escapeHTML(district||'Not available')+'<br>'+
-        'LGA: '+escapeHTML(lga||'Not available')
-      );
-
-      layer.on('click',()=>{
-        const eaValue=valueOf(feature,fields.ea);
-        if(eaValue){
-          $('eaSelect').value=eaValue;
-          showEA(feature);
-        }
-      });
-    }
-  }).addTo(map);
-
-  if(features.length){
-    try{
-      map.fitBounds(geoLayer.getBounds(),{padding:[15,15],maxZoom:12});
-    }catch(e){}
-  }
-
-  $('mapCount').textContent=numberFormat(features.length)+' EAs displayed';
-}
-
-function escapeHTML(value){
-  return String(value).replace(/[&<>"']/g,c=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-}
-
-function updateStatistics(features){
-  $('totalEAs').textContent=numberFormat(originalFeatures.length);
-  $('selectedEAs').textContent=numberFormat(features.length);
-
-  const lgas=uniqueValues(originalFeatures,fields.lga);
-  $('totalLGAs').textContent=fields.lga?numberFormat(lgas.length):'—';
-
-  if(fields.population){
-    const total=features.reduce((sum,f)=>{
-      const n=Number(valueOf(f,fields.population));
-      return sum+(Number.isFinite(n)?n:0);
-    },0);
-    $('totalPopulation').textContent=numberFormat(total);
-  }else{
-    $('totalPopulation').textContent='—';
-  }
-}
-
 function applyFilters(){
-  const lga=$('lgaSelect').value;
-  const district=$('districtSelect').value;
-  const ward=$('wardSelect').value;
-  const ea=$('eaSelect').value;
-
-  filteredFeatures=originalFeatures.filter(f=>
-    (!lga || valueOf(f,fields.lga)===lga) &&
-    (!district || valueOf(f,fields.district)===district) &&
-    (!ward || valueOf(f,fields.ward)===ward) &&
-    (!ea || valueOf(f,fields.ea)===ea)
-  );
-
-  renderMap(filteredFeatures);
-  updateStatistics(filteredFeatures);
-
-  if(ea){
-    const feature=filteredFeatures[0];
-    if(feature) showEA(feature);
-  }else{
-    $('eaDetails').textContent='Select an enumeration area to view its attributes.';
-  }
+ visibleFeatures=currentFilters();mapMetric=$("mapMetric").value||"total";drawMap(visibleFeatures);renderAnalytics(visibleFeatures);
 }
-
-$('applyBtn').addEventListener('click',applyFilters);
-
-$('resetBtn').addEventListener('click',()=>{
-  $('lgaSelect').value='';
-  $('districtSelect').value='';
-  $('wardSelect').value='';
-  $('eaSelect').value='';
-  updateFilters();
-  filteredFeatures=[...originalFeatures];
-  renderMap(filteredFeatures);
-  updateStatistics(filteredFeatures);
-  $('eaDetails').textContent='Select an enumeration area to view its attributes.';
-});
-
-function featureCentroid(feature){
-  try{
-    const centroid=turf.centroid(feature);
-    return centroid.geometry.coordinates;
-  }catch(e){
-    const bounds=L.geoJSON(feature).getBounds();
-    const center=bounds.getCenter();
-    return [center.lng,center.lat];
-  }
+function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
+function csvEscape(v){const s=String(v??"");return '"'+s.replace(/"/g,'""')+'"';}
+function exportCSV(){if(!visibleFeatures.length)return alert("There are no visible EAs to export.");const cols=["EA name","EA code","LGA","District","Ward","Population",...ageKeys];const rows=[cols,...visibleFeatures.map(f=>[eaOf(f),codeOf(f),lgaOf(f),districtOf(f),wardOf(f),f.properties._popTotal,...ageKeys.map(k=>f.properties._age?.[k]??"")])];download("GBoS_GEOAI_population_by_age_filtered.csv","\ufeff"+rows.map(r=>r.map(csvEscape).join(",")).join("\n"),"text/csv;charset=utf-8");}
+function exportGeo(){if(!visibleFeatures.length)return alert("There are no visible EAs to export.");download("GBoS_GEOAI_population_EAs.geojson",JSON.stringify({type:"FeatureCollection",features:visibleFeatures},null,2),"application/geo+json");}
+async function loadData(){
+ setStatus("Fetching GeoJSON and Excel files from GitHub…");
+ $("joinInfo").textContent="Connecting to the repository…";
+ try{
+  const [g,x]=await Promise.all([fetchFirst(GEO_CANDIDATES,"json"),fetchFirst(XLS_CANDIDATES,"xlsx")]);
+  if(!g.buffer||!Array.isArray(g.buffer.features))throw new Error("GeoJSON is not a valid FeatureCollection.");
+  const wb=XLSX.read(g===null?null:x.buffer,{type:"array"});workbookRows=extractWorkbook(wb);
+  const pop=createPopulationIndex(workbookRows);ageKeys=pop.ageKeys;sexKeys=pop.sexKeys;
+  const joined=attachPopulation(g.buffer,pop);allFeatures=joined.features;joinKeyGeo=detectGeoKey(allFeatures[0]?.properties||{})||"Not detected";joinKeyXls=pop.idKey;
+  const matched=allFeatures.filter(f=>f.properties._matched).length;
+  joinedFeatures=allFeatures;
+  fillSelect("lga",allFeatures.map(lgaOf),"All LGAs");refreshAdminSelectors();metricOptions();
+  $("joinInfo").innerHTML=`<b>GeoJSON:</b> ${esc(g.url.split("/").slice(-1)[0])}<br><b>Excel:</b> ${esc(x.url.split("/").slice(-1)[0])}<br><b>EA join field:</b> ${esc(joinKeyGeo)} ↔ ${esc(joinKeyXls)}<br><b>GeoJSON features:</b> ${fmt(allFeatures.length)}<br><b>Excel records:</b> ${fmt(workbookRows.length)}<br><b>Matched EAs:</b> ${fmt(matched)}<br><b>Unmatched EAs:</b> ${fmt(allFeatures.length-matched)}<br><b>Age fields detected:</b> ${ageKeys.length?ageKeys.map(esc).join(", "):"None"}`;
+  $("lastUpdated").textContent="Loaded "+new Date().toLocaleString();
+  setStatus(`Loaded ${fmt(allFeatures.length)} EA polygons · ${fmt(matched)} matched to population records`,matched?"ok":"err");
+  applyFilters();
+ }catch(e){
+  console.error(e);setStatus("Data loading failed: "+e.message,"err");
+  $("joinInfo").textContent="Could not load both datasets. "+e.message+" Check that the files are committed to the repository root or /data/ folder, and that the branch is main.";
+  $("topTable").innerHTML='<tr><td colspan="3">Data unavailable.</td></tr>';
+ }
 }
-
-function showEA(feature){
-  if(selectedLayer) map.removeLayer(selectedLayer);
-
-  selectedLayer=L.geoJSON(feature,{
-    style:{
-      color:'#e49a2d',
-      weight:3,
-      fillColor:'#f4b74b',
-      fillOpacity:.35
-    }
-  }).addTo(map);
-
-  map.fitBounds(selectedLayer.getBounds(),{padding:[35,35],maxZoom:14});
-
-  const props=getProps(feature);
-  let html='<b>Enumeration Area attributes</b><br><br>';
-
-  Object.entries(props).forEach(([key,value])=>{
-    if(value!==null && typeof value!=='object'){
-      html+='<b>'+escapeHTML(key)+':</b> '+escapeHTML(value)+'<br>';
-    }
-  });
-
-  $('eaDetails').innerHTML=html;
-
-  const coords=featureCentroid(feature);
-  selectedWeatherLocation={
-    latitude:coords[1],
-    longitude:coords[0],
-    name:valueOf(feature,fields.ea)||'Selected EA'
-  };
-}
-
-$('eaSelect').addEventListener('change',()=>{
-  const selected=$('eaSelect').value;
-  if(!selected) return;
-  const feature=originalFeatures.find(f=>valueOf(f,fields.ea)===selected);
-  if(feature) showEA(feature);
-});
-
-/* ============================================================
-   WEATHER SERVICES
-   ============================================================ */
-
-function weatherCodeDescription(code){
-  const descriptions={
-    0:'Clear sky',
-    1:'Mainly clear',
-    2:'Partly cloudy',
-    3:'Overcast',
-    45:'Fog',
-    48:'Depositing rime fog',
-    51:'Light drizzle',
-    53:'Moderate drizzle',
-    55:'Dense drizzle',
-    61:'Slight rain',
-    63:'Moderate rain',
-    65:'Heavy rain',
-    71:'Slight snowfall',
-    73:'Moderate snowfall',
-    75:'Heavy snowfall',
-    80:'Rain showers',
-    81:'Moderate rain showers',
-    82:'Violent rain showers',
-    95:'Thunderstorm',
-    96:'Thunderstorm with hail',
-    99:'Thunderstorm with heavy hail'
-  };
-  return descriptions[code]||'Weather conditions';
-}
-
-function getTemperature(value){
-  if(value===null || value===undefined || !Number.isFinite(Number(value))) return '--';
-  const c=Number(value);
-  if($('temperatureUnit').value==='fahrenheit'){
-    return (c*9/5+32).toFixed(1)+' °F';
-  }
-  return c.toFixed(1)+' °C';
-}
-
-function weatherUrl(lat,lon){
-  const days=$('forecastDays').value;
-  return 'https://api.open-meteo.com/v1/forecast?latitude='+lat+
-    '&longitude='+lon+
-    '&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m'+
-    '&hourly=temperature_2m,precipitation_probability,relative_humidity_2m'+
-    '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset'+
-    '&forecast_days='+days+
-    '&timezone=auto';
-}
-
-async function getWeather(lat,lon,name){
-  if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180){
-    showError('Invalid weather coordinates.');
-    return;
-  }
-
-  $('weatherBtn').classList.add('loading');
-  $('weatherDescription').textContent='Retrieving forecast...';
-
-  try{
-    const response=await fetch(weatherUrl(lat,lon));
-    if(!response.ok) throw new Error('Weather service returned an error.');
-    const data=await response.json();
-
-    currentWeather=data;
-    selectedWeatherLocation={latitude:lat,longitude:lon,name:name};
-
-    displayWeather(data,name);
-    showWeatherMarker(lat,lon,name);
-
-    $('dataStatus').className='status success';
-    $('dataStatus').textContent='Weather forecast successfully retrieved.';
-  }catch(error){
-    $('weatherDescription').textContent='Unable to retrieve weather data.';
-    $('dataStatus').className='status error';
-    $('dataStatus').textContent=error.message;
-  }finally{
-    $('weatherBtn').classList.remove('loading');
-  }
-}
-
-function displayWeather(data,name){
-  const c=data.current;
-  const daily=data.daily;
-  const hourly=data.hourly;
-
-  $('weatherPlace').textContent=name+' • '+data.timezone;
-  $('currentTemp').textContent=getTemperature(c.temperature_2m);
-  $('weatherDescription').textContent=weatherCodeDescription(c.weather_code);
-  $('feelsLike').textContent=getTemperature(c.apparent_temperature);
-  $('humidity').textContent=c.relative_humidity_2m+'%';
-  $('windSpeed').textContent=c.wind_speed_10m+' km/h';
-  $('precipitation').textContent=c.precipitation+' mm';
-
-  $('maxTemp').textContent=getTemperature(daily.temperature_2m_max[0]);
-  $('minTemp').textContent=getTemperature(daily.temperature_2m_min[0]);
-
-  const hourlyLabels=hourly.time.slice(0,24).map(t=>t.slice(11,16));
-  const hourlyValues=hourly.temperature_2m.slice(0,24);
-
-  if(hourlyChart) hourlyChart.destroy();
-
-  hourlyChart=new Chart($('hourlyChart'),{
-    type:'line',
-    data:{
-      labels:hourlyLabels,
-      datasets:[{
-        label:'Temperature',
-        data:hourlyValues,
-        borderColor:'#1769aa',
-        backgroundColor:'rgba(23,105,170,.12)',
-        fill:true,
-        tension:.35,
-        pointRadius:2
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{y:{title:{display:true,text:'°C'}}}
-    }
-  });
-
-  if(dailyChart) dailyChart.destroy();
-
-  dailyChart=new Chart($('dailyChart'),{
-    type:'line',
-    data:{
-      labels:daily.time,
-      datasets:[
-        {
-          label:'Maximum',
-          data:daily.temperature_2m_max,
-          borderColor:'#e49a2d',
-          tension:.3
-        },
-        {
-          label:'Minimum',
-          data:daily.temperature_2m_min,
-          borderColor:'#1769aa',
-          tension:.3
-        }
-      ]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{legend:{position:'bottom'}},
-      scales:{y:{title:{display:true,text:'°C'}}}
-    }
-  });
-
-  $('forecastList').innerHTML='';
-
-  daily.time.forEach((date,i)=>{
-    const item=document.createElement('div');
-    item.className='forecast-day';
-    item.innerHTML=
-      '<strong>'+date+'</strong>'+
-      '<span>'+weatherCodeDescription(daily.weather_code[i])+'</span>'+
-      '<b>'+getTemperature(daily.temperature_2m_max[i])+
-      ' / '+getTemperature(daily.temperature_2m_min[i])+'</b>';
-    $('forecastList').appendChild(item);
-  });
-}
-
-function showWeatherMarker(lat,lon,name){
-  if(weatherMarker) map.removeLayer(weatherMarker);
-  weatherMarker=L.circleMarker([lat,lon],{
-    radius:8,color:'#fff',weight:2,
-    fillColor:'#15966b',fillOpacity:1
-  }).addTo(map).bindPopup(
-    '<b>Weather location</b><br>'+escapeHTML(name)+
-    '<br>'+lat.toFixed(5)+', '+lon.toFixed(5)
-  ).openPopup();
-  map.setView([lat,lon],Math.max(map.getZoom(),10));
-}
-
-$('weatherBtn').addEventListener('click',()=>{
-  const mode=$('locationMode').value;
-
-  if(mode==='ea'){
-    if(!selectedWeatherLocation){
-      showError('Select an EA from the map or EA selector first.');
-      return;
-    }
-    getWeather(
-      selectedWeatherLocation.latitude,
-      selectedWeatherLocation.longitude,
-      selectedWeatherLocation.name
-    );
-  }
-
-  if(mode==='manual'){
-    getWeather(
-      Number($('latitude').value),
-      Number($('longitude').value),
-      'Manual weather location'
-    );
-  }
-
-  if(mode==='gps') getGPS();
-});
-
-$('locationMode').addEventListener('change',()=>{
-  $('manualCoordinates').classList.toggle(
-    'hidden',$('locationMode').value!=='manual'
-  );
-});
-
-function getGPS(){
-  if(!navigator.geolocation){
-    showError('Geolocation is not supported by this browser.');
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    position=>{
-      const lat=position.coords.latitude;
-      const lon=position.coords.longitude;
-      getWeather(lat,lon,'Current GPS location');
-    },
-    error=>showError('GPS error: '+error.message),
-    {enableHighAccuracy:true,timeout:15000}
-  );
-}
-
-$('gpsBtn').addEventListener('click',()=>{
-  $('locationMode').value='gps';
-  getGPS();
-});
-
-$('temperatureUnit').addEventListener('change',()=>{
-  if(currentWeather){
-    displayWeather(currentWeather,selectedWeatherLocation.name);
-  }
-});
-
-$('forecastDays').addEventListener('change',()=>{
-  if(selectedWeatherLocation){
-    getWeather(
-      selectedWeatherLocation.latitude,
-      selectedWeatherLocation.longitude,
-      selectedWeatherLocation.name
-    );
-  }
-});
-
-/* ============================================================
-   CSV EXPORTS
-   ============================================================ */
-
-function downloadCSV(rows,filename){
-  if(!rows.length){
-    alert('There is no data to export.');
-    return;
-  }
-
-  const headers=[...new Set(rows.flatMap(row=>Object.keys(row)))];
-  const csv=[
-    headers.join(','),
-    ...rows.map(row=>headers.map(h=>{
-      const value=row[h]??'';
-      return '"'+String(value).replace(/"/g,'""')+'"';
-    }).join(','))
-  ].join('\n');
-
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const link=document.createElement('a');
-  link.href=url;
-  link.download=filename;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-$('exportEA').addEventListener('click',()=>{
-  const features=filteredFeatures.length?filteredFeatures:originalFeatures;
-  const rows=features.map(f=>getProps(f));
-  downloadCSV(rows,'Gambia_Census_EA_Export.csv');
-});
-
-$('exportWeather').addEventListener('click',()=>{
-  if(!currentWeather){
-    alert('Retrieve weather data first.');
-    return;
-  }
-
-  const d=currentWeather.daily;
-  const rows=d.time.map((date,i)=>({
-    date:date,
-    weather:weatherCodeDescription(d.weather_code[i]),
-    maximum_temperature_c:d.temperature_2m_max[i],
-    minimum_temperature_c:d.temperature_2m_min[i],
-    precipitation_mm:d.precipitation_sum[i],
-    precipitation_probability_percent:d.precipitation_probability_max[i],
-    location:selectedWeatherLocation.name,
-    latitude:selectedWeatherLocation.latitude,
-    longitude:selectedWeatherLocation.longitude
-  }));
-
-  downloadCSV(rows,'Gambia_Weather_Forecast.csv');
-});
-
-/* ============================================================
-   CLEAR DATA AND INITIALISATION
-   ============================================================ */
-
-$('clearBtn').addEventListener('click',()=>{
-  originalFeatures=[];
-  filteredFeatures=[];
-  if(geoLayer) map.removeLayer(geoLayer);
-  if(selectedLayer) map.removeLayer(selectedLayer);
-
-  ['lgaSelect','districtSelect','wardSelect','eaSelect'].forEach(id=>{
-    $(id).innerHTML='<option value="">No data loaded</option>';
-    $(id).disabled=true;
-  });
-
-  $('totalEAs').textContent='0';
-  $('selectedEAs').textContent='0';
-  $('totalPopulation').textContent='—';
-  $('totalLGAs').textContent='0';
-  $('eaDetails').textContent='No EA data loaded.';
-  $('mapCount').textContent='0 EAs displayed';
-  $('dataStatus').className='status';
-  $('dataStatus').textContent='GeoJSON data cleared.';
-  selectedWeatherLocation=null;
-});
-
-function updateClock(){
-  $('clock').textContent=new Date().toLocaleString();
-}
-updateClock();
-setInterval(updateClock,1000);
+$("lga").addEventListener("change",()=>{refreshAdminSelectors();});
+$("district").addEventListener("change",()=>{const l=$("lga").value;const d=$("district").value;const sub=allFeatures.filter(f=>(!l||lgaOf(f)===l)&&(!d||districtOf(f)===d));fillSelect("ward",sub.map(wardOf),"All wards");fillSelect("ea",sub.map(eaOf),"All enumeration areas");});
+$("ward").addEventListener("change",()=>{const l=$("lga").value,d=$("district").value,w=$("ward").value;const sub=allFeatures.filter(f=>(!l||lgaOf(f)===l)&&(!d||districtOf(f)===d)&&(!w||wardOf(f)===w));fillSelect("ea",sub.map(eaOf),"All enumeration areas");});
+$("applyBtn").onclick=applyFilters;$("mapMetric").onchange=applyFilters;$("mapStyle").onchange=applyFilters;
+$("reloadBtn").onclick=loadData;
+$("resetBtn").onclick=()=>{$("lga").value="";refreshAdminSelectors();$("district").value="";$("ward").value="";$("ea").value="";$("mapMetric").value="total";$("searchEA").value="";applyFilters();};
+$("zoomBtn").onclick=()=>map.setView([13.45,-15.55],8);
+$("searchBtn").onclick=()=>{const q=norm($("searchEA").value);if(!q)return;const f=allFeatures.find(f=>norm(eaOf(f)).includes(q)||norm(codeOf(f)).includes(q)||norm(districtOf(f)).includes(q)||norm(lgaOf(f)).includes(q));if(!f){alert("No matching EA or administrative name was found.");return;}const layer=geoLayer?.getLayers().find(l=>l.feature===f);if(layer){map.fitBounds(layer.getBounds(),{maxZoom:15});layer.openPopup();showSelected(f);}};
+$("csvBtn").onclick=exportCSV;$("geoBtn").onclick=exportGeo;
+loadData();
 </script>
 </body>
 </html>
